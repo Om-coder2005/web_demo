@@ -1,0 +1,920 @@
+[
+  {
+    "id": "m1",
+    "name": "Bread & Butter",
+    "category": "Bread & Toast",
+    "price": 30,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m2",
+    "name": "Butter Toast",
+    "category": "Bread & Toast",
+    "price": 30,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m3",
+    "name": "Bread Butter Jam",
+    "category": "Bread & Toast",
+    "price": 40,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m4",
+    "name": "Jam Toast",
+    "category": "Bread & Toast",
+    "price": 40,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m5",
+    "name": "Chocolate Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m6",
+    "name": "Plain Toast (Masala)",
+    "category": "Bread & Toast",
+    "price": 40,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m7",
+    "name": "Veg Aloo Toast",
+    "category": "Bread & Toast",
+    "price": 45,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m8",
+    "name": "Corn Toast",
+    "category": "Bread & Toast",
+    "price": 45,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m9",
+    "name": "Veg Aloo with Cheese Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m10",
+    "name": "Cheese Toast",
+    "category": "Bread & Toast",
+    "price": 45,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m11",
+    "name": "Mayonnaise Toast",
+    "category": "Bread & Toast",
+    "price": 45,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m12",
+    "name": "Paneer Makhani Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m13",
+    "name": "Paneer Tandoor Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m14",
+    "name": "Salted Fries",
+    "category": "Fries & More",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m15",
+    "name": "Peri-Peri Fries",
+    "category": "Fries & More",
+    "price": 80,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m16",
+    "name": "Plain Cheese Fries",
+    "category": "Fries & More",
+    "price": 90,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m17",
+    "name": "Peri-Peri Cheese Fries",
+    "category": "Fries & More",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m18",
+    "name": "Crispy Onion Rings",
+    "category": "Fries & More",
+    "price": 90,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m19",
+    "name": "Plain Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 60,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m20",
+    "name": "Plain Grilled Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m21",
+    "name": "Corn Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m22",
+    "name": "Veg Mayo Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 80,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m23",
+    "name": "Veg Cheese Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 80,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m24",
+    "name": "Paneer Makhani Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 90,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m25",
+    "name": "Tandoor Paneer Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 90,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m26",
+    "name": "Veg Club Sandwich",
+    "category": "Veg Sandwiches",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m27",
+    "name": "Veg Crispy Wrap",
+    "category": "Veg Wraps",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m28",
+    "name": "Crispy Makhani Wrap",
+    "category": "Veg Wraps",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m29",
+    "name": "Paneer Makhni Wrap",
+    "category": "Veg Wraps",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m30",
+    "name": "Tandoor Paneer Wrap",
+    "category": "Veg Wraps",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m31",
+    "name": "Paneer Crispy Wrap",
+    "category": "Veg Wraps",
+    "price": 120,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m32",
+    "name": "Misal Pav",
+    "category": "Misal Pav",
+    "price": 50,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m33",
+    "name": "Extra Pav",
+    "category": "Misal Pav",
+    "price": 10,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m34",
+    "name": "Khandoli Single",
+    "category": "Khandoli",
+    "price": 30,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m35",
+    "name": "Khandoli Double",
+    "category": "Khandoli",
+    "price": 60,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m36",
+    "name": "Hollywood Single",
+    "category": "Khandoli",
+    "price": 40,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m37",
+    "name": "Hollywood Double",
+    "category": "Khandoli",
+    "price": 70,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m38",
+    "name": "Sp.Chesse Khandoli",
+    "category": "Khandoli",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m39",
+    "name": "Half Fry Single",
+    "category": "Eggs & More",
+    "price": 30,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m40",
+    "name": "Half Fry Double",
+    "category": "Eggs & More",
+    "price": 60,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m41",
+    "name": "Full Fry Single",
+    "category": "Eggs & More",
+    "price": 30,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m42",
+    "name": "Full Fry Double",
+    "category": "Eggs & More",
+    "price": 60,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m43",
+    "name": "Full Fry Cheese",
+    "category": "Eggs & More",
+    "price": 70,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m44",
+    "name": "Full Fry Mayo",
+    "category": "Eggs & More",
+    "price": 70,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m45",
+    "name": "Omelette Single",
+    "category": "Eggs & More",
+    "price": 40,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m46",
+    "name": "Omelette Double",
+    "category": "Eggs & More",
+    "price": 70,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m47",
+    "name": "Mayo Omelette",
+    "category": "Eggs & More",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m48",
+    "name": "Cheese Omelette",
+    "category": "Eggs & More",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m49",
+    "name": "Chicken Omelette",
+    "category": "Eggs & More",
+    "price": 130,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m50",
+    "name": "Kheema Cheese Onelette",
+    "category": "Eggs & More",
+    "price": 130,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m51",
+    "name": "Special Egg Wrap",
+    "category": "Wraps",
+    "price": 50,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m52",
+    "name": "Chicken Makhani Wrap",
+    "category": "Wraps",
+    "price": 50,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m53",
+    "name": "Egg Toast",
+    "category": "Bread & Toast",
+    "price": 40,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m54",
+    "name": "Egg Cheese/Mayo Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m55",
+    "name": "Chicken Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m56",
+    "name": "Chicken Makhani Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m57",
+    "name": "Kheema Toast",
+    "category": "Bread & Toast",
+    "price": 50,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m58",
+    "name": "Kheema Cheese/Mayo Toast",
+    "category": "Bread & Toast",
+    "price": 60,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m59",
+    "name": "Khandoli Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 60,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m60",
+    "name": "Cheese Khandoli Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m61",
+    "name": "Mayo Khandoli Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m62",
+    "name": "Chicken Mayo Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m63",
+    "name": "Chicken Makhani Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m64",
+    "name": "Kheema Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 100,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m65",
+    "name": "Chicken Khandoli Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 120,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m66",
+    "name": "Kheema Khandoli Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 120,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m67",
+    "name": "Chicken Kheema Mix Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 140,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m68",
+    "name": "Egg Club Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 130,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m69",
+    "name": "NonVeg Club Sandwich",
+    "category": "Khandoli Sandwiches",
+    "price": 160,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m70",
+    "name": "Mutton Kheema Pav",
+    "category": "Mutton Kheema Pav",
+    "price": 120,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m71",
+    "name": "Extra Pav",
+    "category": "Mutton Kheema Pav",
+    "price": 10,
+    "description": "Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m72",
+    "name": "Lemon Tea",
+    "category": "Hot",
+    "price": 20,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m73",
+    "name": "Tea",
+    "category": "Hot",
+    "price": 30,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m74",
+    "name": "Black Coffee",
+    "category": "Hot",
+    "price": 20,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m75",
+    "name": "Hot Coffee",
+    "category": "Hot",
+    "price": 30,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m76",
+    "name": "Irish Hot Coffee",
+    "category": "Hot",
+    "price": 40,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m77",
+    "name": "Hot Chocolate",
+    "category": "Hot",
+    "price": 50,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m78",
+    "name": "Bounty Coconut Hot Chocolate",
+    "category": "Hot",
+    "price": 60,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m79",
+    "name": "Lemon Iced Tea",
+    "category": "Iced Tea / Coffee",
+    "price": 60,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m80",
+    "name": "Passion Fruit Ice Tea",
+    "category": "Iced Tea / Coffee",
+    "price": 60,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m81",
+    "name": "Iced Coffee",
+    "category": "Iced Tea / Coffee",
+    "price": 60,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m82",
+    "name": "Iced Coffee With Milk",
+    "category": "Iced Tea / Coffee",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m83",
+    "name": "Classic Cold Coffee",
+    "category": "Cold Coffee",
+    "price": 80,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m84",
+    "name": "Hezelnut Cold Coffee",
+    "category": "Cold Coffee",
+    "price": 90,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m85",
+    "name": "Irish Cold Coffee",
+    "category": "Cold Coffee",
+    "price": 90,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m86",
+    "name": "Virgin Mojito",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m87",
+    "name": "Blue Lagoon",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m88",
+    "name": "Watermelon Mojito",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m89",
+    "name": "Orange Blast Mojito",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m90",
+    "name": "Green Apple Mojito",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m91",
+    "name": "Spicy Guava Mojito",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m92",
+    "name": "Spicy Pinapple Mojito",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m93",
+    "name": "Mango Mojito",
+    "category": "Mocktails",
+    "price": 70,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m94",
+    "name": "Chocolate Shake",
+    "category": "Shakes",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m95",
+    "name": "Oreo Shake",
+    "category": "Shakes",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m96",
+    "name": "Strawberry Shake",
+    "category": "Shakes",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m97",
+    "name": "Mango Shake",
+    "category": "Shakes",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m98",
+    "name": "Butterscotch Shake",
+    "category": "Shakes",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m99",
+    "name": "Mixberry Shake",
+    "category": "Shakes",
+    "price": 100,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m100",
+    "name": "Soft Drink",
+    "category": "Soft Drink",
+    "price": 20,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m101",
+    "name": "Packegd Drinking Water 500 ml",
+    "category": "Soft Drink",
+    "price": 10,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  },
+  {
+    "id": "m102",
+    "name": "Packegd Drinking Water 1000 ml",
+    "category": "Soft Drink",
+    "price": 20,
+    "description": "Pure Veg • Freshly Prepared",
+    "prepTime": "10 mins",
+    "available": true
+  }
+]
