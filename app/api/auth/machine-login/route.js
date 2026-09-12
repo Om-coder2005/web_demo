@@ -74,6 +74,7 @@ export async function POST(request) {
       name: machineUser.name,
       role: "machine",
       outletId: machineUser.outletId,
+      hotelId: machineUser.outlet?.hotelId || null,
       outletName: machineUser.outlet?.name || null,
       isMachine: true,
     };

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar.js";
 import { getMenu, setMenu, getCurrentUser } from "../../lib/storage.js";
 import { BookOpen, Plus, Search } from "lucide-react";
+import { ReadOnlyAlert } from "../../components/MachineConnectivity.js";
 
 export default function MenuPage() {
   const [menu, setMenuState] = useState([]);
@@ -11,6 +12,7 @@ export default function MenuPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const isReadOnly = ["hotel_owner", "franchise_owner"].includes(user?.role);
 
   const [newItem, setNewItem] = useState({
     name: "",
@@ -30,6 +32,7 @@ export default function MenuPage() {
   }, []);
 
   const handleToggleAvailability = (itemId) => {
+    if (isReadOnly) return;
     const updated = menu.map(m => m.id === itemId ? { ...m, available: !m.available } : m);
     setMenu(updated);
     setMenuState(updated);
@@ -78,6 +81,7 @@ export default function MenuPage() {
       <Navbar />
 
       <div style={{ padding: "clamp(1rem, 2.5vw, 2rem)", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
+        {isReadOnly && <ReadOnlyAlert />}
         {/* Header */}
         <div style={{
           display: "flex",
@@ -102,14 +106,14 @@ export default function MenuPage() {
             </p>
           </div>
 
-          <button
+          {!isReadOnly && <button
             onClick={() => setShowAddForm(!showAddForm)}
             className="khandoli-btn-yellow"
             style={{ fontSize: "0.82rem", padding: "0.55rem 1.15rem" }}
           >
             <Plus style={{ width: "16px", height: "16px" }} />
             <span>{showAddForm ? "Close Form" : "Add New Dish"}</span>
-          </button>
+          </button>}
         </div>
 
         {/* Search & Category Filter bar */}
@@ -164,7 +168,7 @@ export default function MenuPage() {
         </div>
 
         {/* Add Item Form */}
-        {showAddForm && (
+        {!isReadOnly && showAddForm && (
           <form onSubmit={handleAddItemSubmit} className="glass-panel animate-fade-in" style={{
             padding: "1.25rem",
             marginBottom: "1.5rem",
@@ -319,7 +323,7 @@ export default function MenuPage() {
                     </span>
                   </div>
 
-                  <button
+                  {!isReadOnly && <button
                     onClick={() => handleToggleAvailability(m.id)}
                     style={{
                       width: "100%",
@@ -335,7 +339,7 @@ export default function MenuPage() {
                     }}
                   >
                     {m.available ? "Toggle: Out of Stock" : "Toggle: Set Available"}
-                  </button>
+                  </button>}
                 </div>
               </div>
             );
@@ -345,4 +349,3 @@ export default function MenuPage() {
     </div>
   );
 }
-

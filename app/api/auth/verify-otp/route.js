@@ -56,6 +56,7 @@ export async function POST(request) {
       name: user.name,
       role: user.role,
       outletId: user.outletId,
+      hotelId: user.outlet?.hotelId || null,
       outletName: user.outlet?.name || null,
     };
 
@@ -63,6 +64,7 @@ export async function POST(request) {
 
     // Determine redirect based on role
     const redirectMap = {
+      admin: "/admin",
       franchise_owner: "/dashboard",
       hotel_owner: "/dashboard",
       machine: "/tables",

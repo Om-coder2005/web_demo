@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/db.js";
 import { sendOTPEmail } from "../../../../lib/mailer.js";
+import crypto from "crypto";
 
 // Generate a cryptographically safe 6-digit OTP
 function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 export async function POST(request) {

@@ -315,4 +315,19 @@ html, body {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
+.settings-input {
+  width: 100%;
+  min-height: 38px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  color: #0f172a;
+  font-size: 0.84rem;
+}
+
+.settings-input:disabled {
+  color: #64748b;
+  background: #f1f5f9;
+}
 

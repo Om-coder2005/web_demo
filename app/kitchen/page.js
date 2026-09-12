@@ -3,17 +3,23 @@
 import { useState, useEffect } from "react";
 import KOTItemSummary from "../../components/KOTItemSummary.js";
 import Navbar from "../../components/Navbar.js";
-import { getOrders, setOrders, getHistoryOrders, setHistoryOrders } from "../../lib/storage.js";
+import { getOrders, setOrders, getHistoryOrders, setHistoryOrders, getCurrentUser } from "../../lib/storage.js";
 import { ChefHat, CheckCircle, Flame, History, CheckSquare, Square } from "lucide-react";
 import confetti from "canvas-confetti";
+import { canManageKitchen } from "../../lib/permissions.js";
+import { MachineOfflineAlert, ReadOnlyAlert, useMachineConnectivity } from "../../components/MachineConnectivity.js";
 
 export default function KitchenPage() {
+  const [user, setUser] = useState(null);
   const [orders, setOrdersState] = useState([]);
   const [history, setHistoryState] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
   const [animatingDoneOrders, setAnimatingDoneOrders] = useState({});
+  const machineStatus = useMachineConnectivity(user);
+  const isReadOnly = !canManageKitchen(user?.role) || !machineStatus.online;
 
   useEffect(() => {
+    setUser(getCurrentUser());
     setOrdersState(getOrders());
     setHistoryState(getHistoryOrders());
 
@@ -27,6 +33,7 @@ export default function KitchenPage() {
   }, []);
 
   const handleToggleItem = (orderId, itemId) => {
+    if (isReadOnly) return;
     let currentOrders = [...orders];
 
     currentOrders = currentOrders.map(o => {
@@ -58,6 +65,7 @@ export default function KitchenPage() {
   };
 
   const handleMarkEntireOrderDone = (orderObj) => {
+    if (isReadOnly) return;
     try {
       confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
     } catch(e) {}
@@ -113,6 +121,8 @@ export default function KitchenPage() {
       <Navbar />
 
       <div style={{ padding: "clamp(1rem, 2.5vw, 2rem)", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
+        {user && !canManageKitchen(user.role) && <ReadOnlyAlert />}
+        {user && canManageKitchen(user.role) && <MachineOfflineAlert status={machineStatus} />}
         {/* Consolidated KOT Banner */}
         <KOTItemSummary orders={orders} />
 
@@ -281,7 +291,7 @@ export default function KitchenPage() {
                                   border: itemDone ? "1px solid rgba(16, 185, 129, 0.35)" : "1px solid var(--border-color)",
                                   borderRadius: "8px",
                                   padding: "0.65rem 0.8rem",
-                                  cursor: "pointer",
+                                  cursor: isReadOnly ? "not-allowed" : "pointer",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "space-between",
@@ -323,18 +333,18 @@ export default function KitchenPage() {
                       {/* Complete Entire KOT Button */}
                       <button
                         onClick={() => handleMarkEntireOrderDone(o)}
-                        disabled={isDone}
+                        disabled={isDone || isReadOnly}
                         className={isDone ? "khandoli-btn-black" : "khandoli-btn-yellow"}
                         style={{
                           width: "100%",
                           justifyContent: "center",
                           fontSize: "0.85rem",
-                          opacity: isDone ? 0.6 : 1,
+                          opacity: isDone || isReadOnly ? 0.6 : 1,
                           padding: "0.65rem"
                         }}
                       >
                         <CheckCircle style={{ width: "16px", height: "16px" }} />
-                        <span>{isDone ? "Completed! Archiving..." : "Complete Entire KOT"}</span>
+                        <span>{isReadOnly ? "View Only" : isDone ? "Completed! Archiving..." : "Complete Entire KOT"}</span>
                       </button>
                     </div>
                   );
@@ -375,4 +385,3 @@ export default function KitchenPage() {
     </div>
   );
 }
-

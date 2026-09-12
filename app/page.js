@@ -146,24 +146,24 @@ export default function HomePage() {
             padding: "0.85rem 2rem",
             minWidth: "200px"
           }}>
-            <span>Select Staff Role</span>
+            <span>Secure staff sign in</span>
             <ArrowRight style={{ width: "18px", height: "18px" }} />
           </Link>
-          <Link href="/tables" className="khandoli-btn-black" style={{
+          <Link href="/login" className="khandoli-btn-black" style={{
             fontSize: "0.95rem",
             padding: "0.85rem 2rem",
             minWidth: "180px"
           }}>
             <UtensilsCrossed style={{ width: "18px", height: "18px", color: "var(--brand-yellow)" }} />
-            <span>Table Layout</span>
+            <span>Floor POS</span>
           </Link>
-          <Link href="/kitchen" className="khandoli-btn-outline" style={{
+          <Link href="/login" className="khandoli-btn-outline" style={{
             fontSize: "0.95rem",
             padding: "0.85rem 2rem",
             minWidth: "180px"
           }}>
             <ChefHat style={{ width: "18px", height: "18px", color: "#000000" }} />
-            <span>Kitchen Queue</span>
+            <span>Kitchen Display</span>
           </Link>
         </div>
 
@@ -300,4 +300,3 @@ export default function HomePage() {
     </div>
   );
 }
-

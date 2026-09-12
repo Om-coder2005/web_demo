@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Plus, Minus, Trash2, Send, Clock, ChefHat, Check, Search, ShoppingBag, BookOpen } from "lucide-react";
 
-export default function OrderModal({ table, order, menu, onClose, onSaveOrder, onMarkBilled }) {
+export default function OrderModal({ table, order, menu, onClose, onSaveOrder, onMarkBilled, readOnly = false }) {
   const [currentItems, setCurrentItems] = useState(
     order ? JSON.parse(JSON.stringify(order.items)) : []
   );
@@ -15,6 +15,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
   const categories = ["All", ...Array.from(new Set(menu.map(m => m.category)))];
 
   const handleAddItem = (menuItem) => {
+    if (readOnly) return;
     setCurrentItems(prev => {
       const existingIndex = prev.findIndex(item => item.id === menuItem.id);
       if (existingIndex > -1) {
@@ -38,6 +39,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
   };
 
   const handleQuantityChange = (itemId, delta) => {
+    if (readOnly) return;
     setCurrentItems(prev => {
       return prev
         .map(item => {
@@ -57,6 +59,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
   };
 
   const handleDispatchKOT = () => {
+    if (readOnly) return;
     if (currentItems.length === 0) return;
     onSaveOrder({
       tableNumber: table.number,
@@ -242,7 +245,8 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
               </h3>
               {currentItems.length > 0 && (
                 <button
-                  onClick={() => setCurrentItems([])}
+                  onClick={() => !readOnly && setCurrentItems([])}
+                  disabled={readOnly}
                   style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "0.72rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
                 >
                   <Trash2 style={{ width: "13px", height: "13px" }} /> Clear
@@ -318,6 +322,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
                         }}>
                           <button
                             onClick={() => handleQuantityChange(item.id, -1)}
+                            disabled={readOnly}
                             aria-label="Decrease quantity"
                             style={{
                               width: "36px",
@@ -338,6 +343,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
                           </span>
                           <button
                             onClick={() => handleQuantityChange(item.id, 1)}
+                            disabled={readOnly}
                             aria-label="Increase quantity"
                             style={{
                               width: "36px",
@@ -409,6 +415,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
               <div style={{ display: "grid", gridTemplateColumns: table.status !== "Available" ? "1fr 1fr" : "1fr", gap: "0.6rem" }}>
                 <button
                   onClick={handleDispatchKOT}
+                  disabled={readOnly}
                   disabled={currentItems.length === 0}
                   className="khandoli-btn-yellow"
                   style={{
@@ -423,7 +430,8 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
 
                 {table.status !== "Available" && (
                   <button
-                    onClick={() => onMarkBilled(table.number)}
+                    onClick={() => !readOnly && onMarkBilled(table.number)}
+                    disabled={readOnly}
                     className="khandoli-btn-black"
                     style={{
                       fontSize: "0.85rem",
@@ -516,6 +524,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
                   <div
                     key={m.id}
                     onClick={() => handleAddItem(m)}
+                    disabled={readOnly || !m.available}
                     style={{
                       background: "var(--bg-card-secondary)",
                       border: countInCart > 0 ? "2px solid var(--brand-yellow)" : "1px solid var(--border-color)",
@@ -643,4 +652,3 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
     </div>
   );
 }
-

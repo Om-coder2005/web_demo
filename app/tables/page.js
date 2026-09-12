@@ -1,286 +1,138 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import Navbar from "../../components/Navbar.js";
-import KOTItemSummary from "../../components/KOTItemSummary.js";
 import OrderModal from "../../components/OrderModal.js";
-import { getTables, setTables, getOrders, setOrders, getMenu, getCurrentUser } from "../../lib/storage.js";
-import { Utensils, CheckCircle2, AlertCircle, Plus, Receipt } from "lucide-react";
+import { getCurrentUser } from "../../lib/storage.js";
+import { canManageFloor } from "../../lib/permissions.js";
+import { MachineOfflineAlert, ReadOnlyAlert, useMachineConnectivity, useMachineHeartbeat } from "../../components/MachineConnectivity.js";
+import { Plus, Receipt, Settings } from "lucide-react";
 
 export default function TablesPage() {
   const [user, setUser] = useState(null);
-  const [tables, setTablesState] = useState([]);
-  const [orders, setOrdersState] = useState([]);
-  const [menu, setMenuState] = useState([]);
+  const [outlet, setOutlet] = useState(null);
+  const [tables, setTables] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [menu, setMenu] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
   const [activeModalOrder, setActiveModalOrder] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [error, setError] = useState("");
+  const machineStatus = useMachineConnectivity(user);
+  useMachineHeartbeat(user);
+  const isReadOnly = !canManageFloor(user?.role) || !machineStatus.online;
+
+  async function load() {
+    const [tablesRes, ordersRes, menuRes] = await Promise.all([
+      fetch("/api/tables", { cache: "no-store" }),
+      fetch("/api/orders", { cache: "no-store" }),
+      fetch("/api/menu", { cache: "no-store" }),
+    ]);
+    const tablesData = await tablesRes.json();
+    const ordersData = await ordersRes.json();
+    const menuData = await menuRes.json();
+    if (!tablesRes.ok) throw new Error(tablesData.error || "Could not load tables.");
+    if (!ordersRes.ok) throw new Error(ordersData.error || "Could not load orders.");
+    if (!menuRes.ok) throw new Error(menuData.error || "Could not load menu.");
+    setOutlet(tablesData.outlet);
+    setTables(tablesData.tables);
+    setOrders(ordersData.orders);
+    setMenu(menuData.items);
+  }
 
   useEffect(() => {
     setUser(getCurrentUser());
-    setTablesState(getTables());
-    setOrdersState(getOrders());
-    setMenuState(getMenu());
-
-    const handleUpdate = () => {
-      setTablesState(getTables());
-      setOrdersState(getOrders());
-      setMenuState(getMenu());
-    };
-
-    window.addEventListener("pos_data_update", handleUpdate);
-    return () => window.removeEventListener("pos_data_update", handleUpdate);
+    load().catch((err) => setError(err.message));
   }, []);
 
+  useEffect(() => {
+    if (!outlet?.hotelId) return;
+    const events = new EventSource(`/api/realtime?hotelId=${encodeURIComponent(outlet.hotelId)}`);
+    events.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type && !["connected", "heartbeat"].includes(data.type)) load().catch(() => null);
+    };
+    return () => events.close();
+  }, [outlet?.hotelId]);
+
   const handleTableClick = (table) => {
+    if (isReadOnly) return;
+    const order = orders.find((row) => row.tableNumber === table.number && row.status !== "billed");
     setSelectedTable(table);
-    const existingOrder = orders.find(o => o.tableNumber === table.number && o.status === "preparing");
-    setActiveModalOrder(existingOrder || null);
+    setActiveModalOrder(order || null);
   };
 
-  const handleSaveOrder = ({ tableNumber, items, notes }) => {
-    let updatedOrders = [...orders];
-    let existingIndex = updatedOrders.findIndex(o => o.tableNumber === tableNumber && o.status === "preparing");
-
-    if (existingIndex > -1) {
-      updatedOrders[existingIndex] = {
-        ...updatedOrders[existingIndex],
-        items,
-        notes
-      };
-    } else {
-      const newOrder = {
-        id: `kot-${Date.now().toString().slice(-4)}`,
-        tableNumber,
-        waiterName: user?.name || "Sanjay Gupta",
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        createdAt: Date.now(),
-        status: "preparing",
-        items,
-        notes
-      };
-      updatedOrders.unshift(newOrder);
-    }
-
-    // Update tables
-    const updatedTables = tables.map(t => {
-      if (t.number === tableNumber) {
-        return {
-          ...t,
-          status: "Occupied",
-          currentOrderId: updatedOrders.find(o => o.tableNumber === tableNumber && o.status === "preparing")?.id
-        };
-      }
-      return t;
-    });
-
-    setOrders(updatedOrders);
-    setOrdersState(updatedOrders);
-    setTables(updatedTables);
-    setTablesState(updatedTables);
+  const handleSaveOrder = async ({ tableNumber, items, notes }) => {
+    const res = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tableNumber, items, notes }) });
+    const data = await res.json();
+    if (!res.ok) return setError(data.error || "Could not create order.");
     setSelectedTable(null);
+    await load();
   };
 
-  const handleMarkBilled = (tableNumber) => {
-    const updatedTables = tables.map(t => {
-      if (t.number === tableNumber) {
-        return { ...t, status: "Available", currentOrderId: null };
-      }
-      return t;
-    });
-
-    setTables(updatedTables);
-    setTablesState(updatedTables);
+  const handleMarkBilled = async () => {
+    if (!activeModalOrder) return;
+    const res = await fetch("/api/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId: activeModalOrder.id, action: "bill" }) });
+    const data = await res.json();
+    if (!res.ok) return setError(data.error || "Could not bill order.");
     setSelectedTable(null);
+    await load();
   };
-
-  const [statusFilter, setStatusFilter] = useState("All");
 
   if (!user) return null;
 
-  const filteredTables = statusFilter === "All" 
-    ? tables 
-    : tables.filter(t => t.status.toLowerCase() === statusFilter.toLowerCase());
-
-  const availableCount = tables.filter(t => t.status === "Available").length;
-  const occupiedCount = tables.filter(t => t.status === "Occupied").length;
-  const billedCount = tables.filter(t => t.status === "Billed").length;
+  const filteredTables = statusFilter === "All" ? tables : tables.filter((table) => table.status === statusFilter);
+  const count = (status) => tables.filter((table) => table.status === status).length;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column" }} className="mobile-bottom-space">
+    <div style={{ minHeight: "100vh", background: "#ffffff" }} className="mobile-bottom-space">
       <Navbar />
+      <main style={{ padding: "clamp(1rem, 2.5vw, 2rem)", maxWidth: 1300, margin: "0 auto" }}>
+        {!canManageFloor(user.role) && <ReadOnlyAlert />}
+        {canManageFloor(user.role) && <MachineOfflineAlert status={machineStatus} />}
+        {error && <p role="alert" style={{ padding: "0.8rem", background: "#fef2f2", color: "#b91c1c", borderRadius: 8 }}>{error}</p>}
 
-      <div style={{ padding: "clamp(1rem, 2.5vw, 2rem)", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
-        {/* Consolidated KOT Top Item Banner */}
-        <KOTItemSummary orders={orders} />
-
-        {/* Section Header */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1.25rem",
-          flexWrap: "wrap",
-          gap: "1rem"
-        }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.25rem" }}>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
-              <span className="badge badge-khandoli">Floor POS</span>
-              <span style={{ fontSize: "0.78rem", color: "#b45309", fontWeight: 700 }}>
-                {user.hotelName || "Islampur Branch"}
-              </span>
-            </div>
-            <h1 style={{ fontSize: "clamp(1.3rem, 3vw, 1.8rem)", fontWeight: 900, color: "#0f172a", textTransform: "uppercase" }}>
-              Table Layout & Live Orders
-            </h1>
-            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-              Tap any table to open current KOT order, add items, or mark as billed.
-            </p>
+            <span className="badge badge-khandoli">Floor POS</span>
+            <h1 style={{ fontSize: "1.65rem", fontWeight: 900, color: "#0f172a", marginTop: "0.45rem" }}>Tables and live orders</h1>
+            <p style={{ fontSize: "0.84rem", color: "#64748b" }}>{outlet?.name || "Assigned hotel"} · Hotel ID: <strong>{outlet?.hotelId || "Not assigned"}</strong></p>
           </div>
+          <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", alignItems: "center" }}>
+            {["All", "Available", "Occupied", "Billed"].map((label) => <button key={label} onClick={() => setStatusFilter(label)} className={statusFilter === label ? "khandoli-btn-yellow" : "khandoli-btn-outline"} style={{ padding: "0.45rem 0.75rem" }}>{label} ({label === "All" ? tables.length : count(label)})</button>)}
+          </div>
+        </div>
 
-          {/* Table Status Filter Chips */}
-          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-            {[
-              { label: "All", count: tables.length },
-              { label: "Available", count: availableCount },
-              { label: "Occupied", count: occupiedCount },
-              { label: "Billed", count: billedCount }
-            ].map(tab => {
-              const isSelected = statusFilter === tab.label;
+        {!tables.length ? (
+          <div className="glass-panel" style={{ padding: "2rem", textAlign: "center", background: "#fff" }}>
+            <Settings size={38} style={{ color: "#b45309", marginBottom: "0.8rem" }} />
+            <h2 style={{ fontSize: "1.2rem", fontWeight: 850, color: "#0f172a" }}>No table grid configured</h2>
+            <p style={{ color: "#64748b", fontSize: "0.86rem", margin: "0.35rem auto 1rem", maxWidth: 520 }}>The hotel owner must create the table grid from Settings before waiters can take orders.</p>
+            {user.role === "hotel_owner" && <Link href="/settings" className="khandoli-btn-yellow" style={{ textDecoration: "none", display: "inline-flex" }}>Open settings</Link>}
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 170px), 1fr))", gap: "1rem" }}>
+            {filteredTables.map((table) => {
+              const order = orders.find((row) => row.tableNumber === table.number && row.status !== "billed");
+              const itemCount = order ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
               return (
-                <button
-                  key={tab.label}
-                  onClick={() => setStatusFilter(tab.label)}
-                  style={{
-                    background: isSelected ? "var(--brand-yellow)" : "#ffffff",
-                    color: isSelected ? "#000000" : "var(--text-muted)",
-                    border: isSelected ? "1px solid var(--brand-yellow)" : "1px solid var(--border-color)",
-                    padding: "0.35rem 0.75rem",
-                    borderRadius: "8px",
-                    fontSize: "0.75rem",
-                    fontWeight: 800,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    cursor: "pointer",
-                    transition: "all 0.15s ease"
-                  }}
-                >
-                  {tab.label} ({tab.count})
+                <button key={table.id} onClick={() => handleTableClick(table)} className="glass-panel" style={{ textAlign: "left", padding: "1rem", cursor: isReadOnly ? "not-allowed" : "pointer", background: table.status === "Occupied" ? "rgba(252,197,0,0.12)" : "#fff", border: table.status === "Occupied" ? "2px solid var(--brand-yellow)" : "1px solid var(--border-color)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.7rem" }}>
+                    <strong style={{ fontSize: "1.15rem", color: "#0f172a" }}>{table.label || `T${table.number}`}</strong>
+                    <span className={`badge ${table.status === "Occupied" ? "badge-occupied" : table.status === "Billed" ? "badge-billed" : "badge-available"}`}>{table.status}</span>
+                  </div>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b" }}>{table.section} · {table.capacity} seats</p>
+                  {order ? <p style={{ marginTop: "0.65rem", color: "#b45309", fontWeight: 850 }}><Receipt size={15} /> KOT #{order.id.slice(-6)} · {itemCount} items · Rs {Number(order.totalAmount || 0).toFixed(2)}</p> : <p style={{ marginTop: "0.65rem", color: "#64748b" }}>Ready for guests</p>}
+                  <span style={{ marginTop: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 750 }}><Plus size={13} /> {order ? "View / bill" : "New order"}</span>
                 </button>
               );
             })}
           </div>
-        </div>
+        )}
+      </main>
 
-        {/* Table Grid (Responsive: 2 cols on mobile, 3-4 on tablet, 4-6 on desktop) */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 170px), 1fr))",
-          gap: "1rem"
-        }}>
-          {filteredTables.map(t => {
-            const hasOrder = orders.find(o => o.tableNumber === t.number && o.status === "preparing");
-            const itemCount = hasOrder ? hasOrder.items.reduce((acc, curr) => acc + curr.quantity, 0) : 0;
-            const orderTotal = hasOrder ? hasOrder.items.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0).toFixed(2) : "0.00";
-
-            const isOccupied = t.status === "Occupied";
-            const isBilled = t.status === "Billed";
-
-            return (
-              <div
-                key={t.id}
-                onClick={() => handleTableClick(t)}
-                className="glass-panel"
-                style={{
-                  padding: "1.15rem",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  border: isOccupied 
-                    ? "2px solid var(--brand-yellow)" 
-                    : isBilled 
-                    ? "1px solid rgba(59, 130, 246, 0.5)" 
-                    : "1px solid var(--border-color)",
-                  background: isOccupied 
-                    ? "rgba(252, 197, 0, 0.12)" 
-                    : "#ffffff"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-3px)"}
-                onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
-              >
-                {/* Card Header: Table Number & Status */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.85rem" }}>
-                  <div style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "10px",
-                    background: isOccupied ? "var(--brand-yellow)" : "var(--bg-card-secondary)",
-                    color: isOccupied ? "#000000" : "#0f172a",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 900,
-                    fontSize: "1.15rem",
-                    boxShadow: isOccupied ? "0 2px 8px rgba(252, 197, 0, 0.3)" : "none"
-                  }}>
-                    T{t.number}
-                  </div>
-                  <span className={`badge ${isOccupied ? "badge-occupied" : isBilled ? "badge-billed" : "badge-available"}`}>
-                    {t.status}
-                  </span>
-                </div>
-
-                {/* Card Body: Info */}
-                <div style={{ marginBottom: "0.85rem", minHeight: "44px" }}>
-                  <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                    Seats: {t.capacity} Persons
-                  </div>
-                  {hasOrder ? (
-                    <div style={{ marginTop: "0.35rem" }}>
-                      <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#0f172a" }}>
-                        KOT #{hasOrder.id} • {itemCount} items
-                      </div>
-                      <div style={{ fontSize: "1.05rem", fontWeight: 900, color: "#b45309", marginTop: "0.15rem" }}>
-                        ₹{orderTotal}
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "0.35rem" }}>
-                      Ready for guests
-                    </div>
-                  )}
-                </div>
-
-                {/* Card Footer: Quick Action Indicator */}
-                <div style={{
-                  background: isOccupied ? "rgba(252, 197, 0, 0.2)" : "var(--bg-card-secondary)",
-                  color: isOccupied ? "#b45309" : "var(--text-muted)",
-                  padding: "0.45rem 0.65rem",
-                  borderRadius: "8px",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between"
-                }}>
-                  <span>{hasOrder ? "Modify Order" : "New Order"}</span>
-                  <Plus style={{ width: "13px", height: "13px" }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* POS Order Modal */}
-      {selectedTable && (
-        <OrderModal
-          table={selectedTable}
-          order={activeModalOrder}
-          menu={menu}
-          onClose={() => setSelectedTable(null)}
-          onSaveOrder={handleSaveOrder}
-          onMarkBilled={handleMarkBilled}
-        />
-      )}
+      {selectedTable && <OrderModal table={selectedTable} order={activeModalOrder} menu={menu} onClose={() => setSelectedTable(null)} onSaveOrder={handleSaveOrder} onMarkBilled={handleMarkBilled} readOnly={isReadOnly} />}
     </div>
   );
 }

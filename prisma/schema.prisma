@@ -17,16 +17,21 @@ datasource db {
 
 model Outlet {
   id           String   @id @default(cuid())
+  hotelId      String   @unique @default(cuid())
   name         String
   slug         String   @unique
   address      String
   phone        String   @default("")
+  billNote     String   @default("")
+  kotNote      String   @default("")
   status       String   @default("Active") // Active, Inactive
   dailyRevenue Float    @default(0)
   staffCount   Int      @default(0)
+  franchiseOwnerId String?
+  franchiseOwner   User?    @relation("FranchiseOutlets", fields: [franchiseOwnerId], references: [id])
   createdAt    DateTime @default(now())
 
-  users             User[]
+  users             User[] @relation("OutletUsers")
   machineCredential MachineCredential?
   menuItems         MenuItem[]
   tables            Table[]
@@ -44,16 +49,18 @@ model User {
   name         String
   role         UserRole
   outletId     String?
-  outlet       Outlet?  @relation(fields: [outletId], references: [id])
+  outlet       Outlet?  @relation("OutletUsers", fields: [outletId], references: [id])
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   billEdits BillAuditLog[]
   stockLogs StockLog[]
+  franchiseOutlets Outlet[] @relation("FranchiseOutlets")
 }
 
 enum UserRole {
+  admin
   franchise_owner
   hotel_owner
   machine
@@ -78,10 +85,10 @@ model MachineCredential {
   outlet        Outlet   @relation(fields: [outletId], references: [id])
   machineEmail  String   @unique
   passwordHash  String
-  plainPassword String // Shown once to owner only, hashed stored separately
   apiToken      String   @unique
   isOnline      Boolean  @default(false)
   lastHeartbeat DateTime?
+  passwordLastRotatedAt DateTime @default(now())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -98,6 +105,8 @@ model MenuItem {
   category          String
   price             Float
   description       String  @default("")
+  kitchenNote       String  @default("")
+  billNote          String  @default("")
   prepTime          String  @default("10 mins")
   available         Boolean @default(true)
   trackStock        Boolean @default(false)
@@ -130,6 +139,8 @@ model Table {
   outletId       String
   outlet         Outlet  @relation(fields: [outletId], references: [id])
   number         Int
+  label          String  @default("")
+  section        String  @default("Main")
   capacity       Int     @default(4)
   status         String  @default("Available") // Available, Occupied, Billed
   currentOrderId String?
@@ -147,6 +158,7 @@ model Order {
   outletId     String
   outlet       Outlet      @relation(fields: [outletId], references: [id])
   tableNumber  Int
+  billNumber   Int?
   waiterName   String
   status       OrderStatus @default(preparing)
   totalAmount  Float       @default(0)
@@ -155,6 +167,7 @@ model Order {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   completedAt  DateTime?
+  billedAt     DateTime?
 
   items      OrderItem[]
   auditLogs  BillAuditLog[]

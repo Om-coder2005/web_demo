@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { getCurrentUser, setSelectedHotel, getHotels, getSelectedHotel } from "../lib/storage.js";
+import { usePathname, useRouter } from "next/navigation";
+import { getCurrentUser, setSelectedHotel, getHotels, getSelectedHotel, clearCurrentUser } from "../lib/storage.js";
 import { 
   UtensilsCrossed, 
   ChefHat, 
@@ -15,11 +15,14 @@ import {
   UserCheck,
   Menu as MenuIcon,
   X,
-  Store
+  Store,
+  ShieldCheck,
+  Settings
 } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotelState] = useState(null);
@@ -52,6 +55,13 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   };
 
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    clearCurrentUser();
+    router.replace("/login");
+    router.refresh();
+  };
+
   if (!user) return null;
 
   const navLinks = [
@@ -74,10 +84,22 @@ export default function Navbar() {
       roles: ["hotel_owner", "franchise_owner"]
     },
     {
+      href: "/settings",
+      label: "Settings",
+      icon: Settings,
+      roles: ["hotel_owner"]
+    },
+    {
       href: "/dashboard",
       label: user.role === "franchise_owner" ? "Franchise Analytics" : "Dashboard",
       icon: LayoutDashboard,
       roles: ["hotel_owner", "franchise_owner"]
+    },
+    {
+      href: "/admin",
+      label: "Account Control",
+      icon: ShieldCheck,
+      roles: ["admin"]
     }
   ];
 
@@ -251,8 +273,8 @@ export default function Navbar() {
           </div>
 
           {/* Switch Role Button */}
-          <Link
-            href="/login"
+          <button
+            onClick={logout}
             className="desktop-only"
             style={{
               background: "var(--bg-card-secondary)",
@@ -266,12 +288,12 @@ export default function Navbar() {
               alignItems: "center",
               gap: "0.4rem",
               textDecoration: "none",
-              transition: "all 0.2s ease"
+              transition: "all 0.2s ease", cursor: "pointer"
             }}
           >
             <LogOut style={{ width: "13px", height: "13px", color: "#b45309" }} />
             <span>Switch</span>
-          </Link>
+          </button>
 
           {/* Mobile Hamburger Button */}
           <button
@@ -330,9 +352,8 @@ export default function Navbar() {
                 Role: {user.role.replace("_", " ")}
               </div>
             </div>
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
+            <button
+              onClick={() => { setMobileMenuOpen(false); logout(); }}
               style={{
                 background: "#ffffff",
                 border: "1px solid var(--border-color)",
@@ -348,7 +369,7 @@ export default function Navbar() {
               }}
             >
               <LogOut style={{ width: "14px", height: "14px" }} /> Switch
-            </Link>
+            </button>
           </div>
 
           {/* Mobile Outlet Switcher */}
@@ -479,4 +500,3 @@ export default function Navbar() {
     </>
   );
 }
-

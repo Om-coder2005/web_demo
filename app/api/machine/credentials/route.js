@@ -7,13 +7,16 @@ import { sendMachineCredentialsEmail } from "../../../../lib/mailer.js";
 
 /**
  * GET /api/machine/credentials
- * Get the machine credential for the current owner's outlet.
+ * Get non-secret machine status for the current owner's outlet.
  */
 export async function GET(request) {
   const session = getSessionFromRequest(request);
 
   if (!session || !["hotel_owner", "franchise_owner"].includes(session.role)) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
+  }
+  if (!session.outletId) {
+    return NextResponse.json({ error: "This account is not scoped to an outlet." }, { status: 400 });
   }
 
   const credential = await prisma.machineCredential.findUnique({
@@ -29,10 +32,9 @@ export async function GET(request) {
     credential: {
       id: credential.id,
       machineEmail: credential.machineEmail,
-      // Never send hash — send the stored plain password for display
-      machinePassword: credential.plainPassword,
       isOnline: credential.isOnline,
       lastHeartbeat: credential.lastHeartbeat,
+      passwordLastRotatedAt: credential.passwordLastRotatedAt,
       outletName: credential.outlet.name,
     },
   });
@@ -40,7 +42,7 @@ export async function GET(request) {
 
 /**
  * POST /api/machine/credentials
- * Generate (or regenerate) machine credentials for an outlet.
+ * Generate (or rotate) machine credentials for an outlet.
  * Only callable by hotel_owner.
  */
 export async function POST(request) {
@@ -51,6 +53,9 @@ export async function POST(request) {
   }
 
   const outletId = session.outletId;
+  if (!outletId) {
+    return NextResponse.json({ error: "This account is not scoped to an outlet." }, { status: 400 });
+  }
 
   const outlet = await prisma.outlet.findUnique({ where: { id: outletId } });
   if (!outlet) {
@@ -62,7 +67,8 @@ export async function POST(request) {
   const machineEmail = `machine.${slug}@khandoli.pos`;
 
   // Generate a strong 12-character password: letters + digits
-  const plainPassword = crypto.randomBytes(6).toString("hex"); // 12 hex chars
+  // Returned only in this response and delivered to the owner by email. Never persist it.
+  const plainPassword = crypto.randomBytes(18).toString("base64url");
   const passwordHash = await bcrypt.hash(plainPassword, 10);
   const apiToken = crypto.randomBytes(32).toString("hex");
 
@@ -73,16 +79,15 @@ export async function POST(request) {
       outletId,
       machineEmail,
       passwordHash,
-      plainPassword,
       apiToken,
     },
     update: {
       machineEmail,
       passwordHash,
-      plainPassword,
       apiToken,
       isOnline: false,
       lastHeartbeat: null,
+      passwordLastRotatedAt: new Date(),
     },
   });
 
@@ -117,7 +122,7 @@ export async function POST(request) {
 
   return NextResponse.json({
     success: true,
-    message: "Machine credentials generated and emailed to you.",
+    message: "Machine credentials rotated. Save the password now; it cannot be displayed again.",
     credential: {
       machineEmail,
       machinePassword: plainPassword,

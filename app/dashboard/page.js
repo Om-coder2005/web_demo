@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const [staff, setStaff] = useState({ kitchen: [], waiters: [] });
   const [orders, setOrders] = useState([]);
   const [selectedFranchiseHotel, setSelectedFranchiseHotel] = useState(null);
+  const [dbOutlet, setDbOutlet] = useState(null);
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -31,6 +32,10 @@ export default function DashboardPage() {
     setHotels(getHotels());
     setStaff(getStaff());
     setOrders(getOrders());
+    fetch("/api/outlets/me", { cache: "no-store" })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => setDbOutlet(data?.currentOutlet || null))
+      .catch(() => null);
 
     const handleUpdate = () => {
       setUser(getCurrentUser());
@@ -108,6 +113,11 @@ export default function DashboardPage() {
                 ? "Consolidated performance & live monitoring across 11 Maharashtra branches." 
                 : `Real-time kitchen load, billing & staff metrics for ${selectedFranchiseHotel ? selectedFranchiseHotel.name : "Kolhapur HQ (Shivaji Udyam Nagar)"}.`}
             </p>
+            {!isFranchiseMode && (
+              <p style={{ fontSize: "0.8rem", color: "#0f172a", marginTop: "0.35rem", fontWeight: 800 }}>
+                Hotel ID: {dbOutlet?.hotelId || user.hotelId || user.outletId || "Not assigned"}
+              </p>
+            )}
           </div>
 
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", width: "100%", maxWidth: "fit-content" }}>
@@ -329,4 +339,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
