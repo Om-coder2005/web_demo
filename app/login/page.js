@@ -10,7 +10,8 @@ import {
   UtensilsCrossed, 
   ChefHat, 
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Flame
 } from "lucide-react";
 
 export default function LoginPage() {
@@ -23,36 +24,36 @@ export default function LoginPage() {
     {
       id: "franchise_owner",
       title: "Franchise Owner",
-      desc: "Full access to all outlets, global revenue analytics & branch management",
+      desc: "Multi-branch analytics, global revenue monitoring & 11-branch franchise auditing.",
       icon: Building2,
-      color: "#4f46e5",
+      color: "var(--brand-yellow)",
       redirect: "/dashboard",
-      userName: "Vikram Malhotra (Franchise Owner)"
+      userName: "Nitin Shinde (Franchise Owner)"
     },
     {
       id: "hotel_owner",
-      title: "Outlet Owner",
-      desc: "Dashboard, kitchen staff, waiters, analytics, table & menu controls",
+      title: "Outlet Manager",
+      desc: "Full branch dashboard, active waiters, chefs, table arrangement & menu catalog control.",
       icon: Store,
-      color: "#ec4899",
+      color: "#ffffff",
       redirect: "/dashboard",
-      userName: "Rajesh Sharma (Outlet Owner)"
+      userName: "Abhijeet Shinde (Outlet Manager)"
     },
     {
       id: "waiter",
-      title: "Waiter",
-      desc: "Direct table layout view, order management, menu billing & KOT dispatch",
+      title: "Floor Waiter",
+      desc: "Live table layout, 102-item menu card billing, kitchen notes & direct KOT dispatch.",
       icon: UtensilsCrossed,
-      color: "#34d399",
+      color: "var(--brand-yellow)",
       redirect: "/tables",
-      userName: "Sanjay Gupta (Waiter)"
+      userName: "Sanjay Gupta (Floor Waiter)"
     },
     {
       id: "kitchen",
-      title: "Kitchen",
-      desc: "Kitchen display window, item consolidated summary, live KOT completion",
+      title: "Kitchen Master",
+      desc: "Real-time kitchen order queue, consolidated item prep counter & KOT completion.",
       icon: ChefHat,
-      color: "#fbbf24",
+      color: "#22c55e",
       redirect: "/kitchen",
       userName: "Chef Ramesh Kumar (Head Chef)"
     }
@@ -63,7 +64,7 @@ export default function LoginPage() {
       role: roleObj.id,
       name: roleObj.userName,
       hotelId: activeHotel ? activeHotel.id : "hotel-1",
-      hotelName: activeHotel ? activeHotel.name : "Outlet 1 (Main Street)"
+      hotelName: activeHotel ? activeHotel.name : "Islampur Branch"
     };
 
     setCurrentUser(userPayload);
@@ -75,7 +76,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0b1329", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column" }} className="mobile-bottom-space">
       <Navbar />
 
       <div style={{
@@ -83,30 +84,50 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "2rem 1.5rem"
+        padding: "clamp(1rem, 3vw, 2.5rem) 1rem"
       }}>
         <div className="glass-panel animate-fade-in" style={{
-          maxWidth: "850px",
+          maxWidth: "880px",
           width: "100%",
-          padding: "2.5rem",
-          background: "#151d38",
-          border: "1px solid rgba(255, 255, 255, 0.15)"
+          padding: "clamp(1.25rem, 3vw, 2.5rem)",
+          background: "#ffffff",
+          border: "1px solid var(--border-color)",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.06)"
         }}>
-          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "#fff", marginBottom: "0.5rem" }}>
-              NextBills Role Selector
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              background: "rgba(252, 197, 0, 0.2)",
+              color: "#b45309",
+              padding: "0.3rem 0.8rem",
+              borderRadius: "6px",
+              fontSize: "0.72rem",
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              marginBottom: "0.75rem"
+            }}>
+              <Flame style={{ width: "13px", height: "13px" }} />
+              <span>70 YEARS · ONE TASTE</span>
+            </div>
+
+            <h2 style={{ fontSize: "clamp(1.5rem, 4vw, 2.2rem)", fontWeight: 900, color: "#0f172a", textTransform: "uppercase", letterSpacing: "-0.01em" }}>
+              Staff & Management Portal
             </h2>
-            <p style={{ fontSize: "0.9rem", color: "#94a3b8" }}>
-              Select any role below to experience the specialized POS workflows for each user type.
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", maxWidth: "550px", margin: "0.5rem auto 0" }}>
+              Select your role below to access specialized operations for Khandoli Nitin's Canteen.
             </p>
           </div>
 
           {/* Role Cards Grid */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-            gap: "1.25rem",
-            marginBottom: "2rem"
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+            gap: "1rem",
+            marginBottom: "1.75rem"
           }}>
             {roles.map(r => {
               const Icon = r.icon;
@@ -117,54 +138,67 @@ export default function LoginPage() {
                   key={r.id}
                   onClick={() => setSelectedRole(r.id)}
                   style={{
-                    background: isSelected ? "rgba(79, 70, 229, 0.2)" : "#0b1329",
-                    border: isSelected ? "2px solid #4f46e5" : "1px solid rgba(255, 255, 255, 0.1)",
+                    background: isSelected ? "rgba(252, 197, 0, 0.12)" : "var(--bg-card-secondary)",
+                    border: isSelected ? "2px solid var(--brand-yellow)" : "1px solid var(--border-color)",
                     borderRadius: "14px",
-                    padding: "1.25rem",
+                    padding: "1.2rem",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
-                    position: "relative"
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between"
                   }}
                 >
                   {isSelected && (
                     <div style={{ position: "absolute", top: "1rem", right: "1rem" }}>
-                      <CheckCircle2 style={{ color: "#4f46e5", width: "20px", height: "20px" }} />
+                      <CheckCircle2 style={{ color: "#b45309", width: "20px", height: "20px" }} />
                     </div>
                   )}
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.75rem" }}>
-                    <div style={{
-                      background: "rgba(255,255,255,0.05)",
-                      padding: "0.6rem",
-                      borderRadius: "10px"
-                    }}>
-                      <Icon style={{ color: r.color, width: "24px", height: "24px" }} />
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", marginBottom: "0.75rem" }}>
+                      <div style={{
+                        background: isSelected ? "var(--brand-yellow)" : "#ffffff",
+                        color: "#0f172a",
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        border: "1px solid var(--border-color)",
+                        transition: "all 0.2s ease"
+                      }}>
+                        <Icon style={{ width: "22px", height: "22px" }} />
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: "1.05rem", fontWeight: 800, color: "#0f172a", textTransform: "uppercase" }}>
+                          {r.title}
+                        </h4>
+                        <span style={{ fontSize: "0.72rem", color: isSelected ? "#b45309" : "var(--text-muted)", fontWeight: 700 }}>
+                          View: {r.redirect}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h4 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff" }}>
-                        {r.title}
-                      </h4>
-                      <span style={{ fontSize: "0.75rem", color: r.color, fontWeight: 600 }}>
-                        Redirects to: {r.redirect}
-                      </span>
-                    </div>
-                  </div>
 
-                  <p style={{ fontSize: "0.825rem", color: "#94a3b8", lineHeight: 1.4 }}>
-                    {r.desc}
-                  </p>
+                    <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
+                      {r.desc}
+                    </p>
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Outlet Context Selector */}
+          {/* Active Outlet Branch Selector */}
           <div style={{
-            background: "#0b1329",
+            background: "var(--bg-card-secondary)",
             borderRadius: "12px",
             padding: "1rem 1.25rem",
-            marginBottom: "2rem",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            marginBottom: "1.75rem",
+            border: "1px solid var(--border-color)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -172,11 +206,11 @@ export default function LoginPage() {
             gap: "1rem"
           }}>
             <div>
-              <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#f8fafc" }}>
+              <div style={{ fontSize: "0.85rem", fontWeight: 800, color: "#0f172a", textTransform: "uppercase" }}>
                 Active Outlet Branch:
               </div>
-              <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-                Choose which outlet branch to simulate for this session
+              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                Selected branch location across Maharashtra
               </div>
             </div>
 
@@ -187,43 +221,47 @@ export default function LoginPage() {
                 if (found) setActiveHotel(found);
               }}
               style={{
-                background: "#151d38",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "#fff",
-                padding: "0.5rem 1rem",
+                background: "#ffffff",
+                border: "1px solid var(--border-color)",
+                color: "#0f172a",
+                padding: "0.6rem 1rem",
                 borderRadius: "8px",
                 fontSize: "0.85rem",
+                fontWeight: 700,
                 outline: "none",
-                cursor: "pointer"
+                cursor: "pointer",
+                minWidth: "220px",
+                maxWidth: "100%"
               }}
             >
               {hotels.map(h => (
-                <option key={h.id} value={h.id} style={{ background: "#151d38", color: "#fff" }}>
+                <option key={h.id} value={h.id} style={{ background: "#ffffff", color: "#0f172a" }}>
                   {h.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Login Action */}
+          {/* Log In Button */}
           <button
             onClick={() => {
               const matched = roles.find(r => r.id === selectedRole);
               if (matched) handleLogin(matched);
             }}
-            className="glass-button"
+            className="khandoli-btn-yellow"
             style={{
               width: "100%",
-              justifyContent: "center",
-              padding: "0.9rem",
-              fontSize: "1rem",
+              padding: "0.95rem",
+              fontSize: "0.95rem",
               borderRadius: "12px"
             }}
           >
-            Log In as {roles.find(r => r.id === selectedRole)?.title} <ArrowRight style={{ width: "20px", height: "20px" }} />
+            <span>Log In as {roles.find(r => r.id === selectedRole)?.title}</span>
+            <ArrowRight style={{ width: "18px", height: "18px" }} />
           </button>
         </div>
       </div>
     </div>
   );
 }
+

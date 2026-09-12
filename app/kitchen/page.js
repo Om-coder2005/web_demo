@@ -109,10 +109,10 @@ export default function KitchenPage() {
   const sortedLiveOrders = [...orders].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0b1329", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column" }} className="mobile-bottom-space">
       <Navbar />
 
-      <div style={{ padding: "1.5rem 2rem", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
+      <div style={{ padding: "clamp(1rem, 2.5vw, 2rem)", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
         {/* Consolidated KOT Banner */}
         <KOTItemSummary orders={orders} />
 
@@ -121,54 +121,69 @@ export default function KitchenPage() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "1.5rem"
+          marginBottom: "1.25rem",
+          flexWrap: "wrap",
+          gap: "1rem"
         }}>
           <div>
-            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <ChefHat style={{ color: "#fbbf24", width: "28px", height: "28px" }} /> Kitchen Display Queue
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+              <span className="badge badge-khandoli">Kitchen Display System</span>
+              <span style={{ fontSize: "0.78rem", color: "#b45309", fontWeight: 700 }}>
+                Live Floor Orders
+              </span>
+            </div>
+            <h1 style={{ fontSize: "clamp(1.3rem, 3vw, 1.8rem)", fontWeight: 900, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem", textTransform: "uppercase" }}>
+              <ChefHat style={{ color: "#b45309", width: "26px", height: "26px" }} /> Kitchen Order Queue
             </h1>
-            <p style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
-              Mark items or entire order as done. Completed orders shift to History after 2 seconds.
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              Tap items to mark done or complete entire ticket. Completed tickets shift to History after 2s.
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: "0.5rem", background: "#151d38", padding: "0.3rem", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.1)" }}>
+          {/* Active Tab Switcher */}
+          <div style={{ display: "flex", gap: "0.4rem", background: "var(--bg-card-secondary)", padding: "0.25rem", borderRadius: "10px", border: "1px solid var(--border-color)" }}>
             <button
               onClick={() => setActiveTab("live")}
               style={{
-                background: activeTab === "live" ? "#4f46e5" : "transparent",
+                background: activeTab === "live" ? "var(--brand-yellow)" : "transparent",
                 border: "none",
-                color: "#fff",
-                padding: "0.5rem 1.25rem",
+                color: activeTab === "live" ? "#000000" : "var(--text-muted)",
+                padding: "0.45rem 1rem",
                 borderRadius: "8px",
-                fontSize: "0.85rem",
-                fontWeight: 700,
+                fontSize: "0.78rem",
+                fontWeight: 800,
+                textTransform: "uppercase",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                gap: "0.4rem"
+                gap: "0.4rem",
+                transition: "all 0.15s ease"
               }}
             >
-              <Flame style={{ width: "16px", height: "16px" }} /> Active KOTs ({sortedLiveOrders.length})
+              <Flame style={{ width: "15px", height: "15px" }} />
+              <span>Active KOTs ({sortedLiveOrders.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab("history")}
               style={{
-                background: activeTab === "history" ? "#4f46e5" : "transparent",
+                background: activeTab === "history" ? "var(--brand-yellow)" : "transparent",
                 border: "none",
-                color: "#fff",
-                padding: "0.5rem 1.25rem",
+                color: activeTab === "history" ? "#000000" : "var(--text-muted)",
+                padding: "0.45rem 1rem",
                 borderRadius: "8px",
-                fontSize: "0.85rem",
-                fontWeight: 700,
+                fontSize: "0.78rem",
+                fontWeight: 800,
+                textTransform: "uppercase",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                gap: "0.4rem"
+                gap: "0.4rem",
+                transition: "all 0.15s ease"
               }}
             >
-              <History style={{ width: "16px", height: "16px" }} /> History ({history.length})
+              <History style={{ width: "15px", height: "15px" }} />
+              <span>History ({history.length})</span>
             </button>
           </div>
         </div>
@@ -177,13 +192,17 @@ export default function KitchenPage() {
         {activeTab === "live" && (
           <div>
             {sortedLiveOrders.length === 0 ? (
-              <div className="glass-panel" style={{ textAlign: "center", padding: "4rem 2rem", color: "#64748b" }}>
-                <CheckCircle style={{ width: "48px", height: "48px", color: "#34d399", marginBottom: "1rem" }} />
-                <h3 style={{ fontSize: "1.2rem", color: "#fff", marginBottom: "0.5rem" }}>Kitchen Queue Clear!</h3>
-                <p style={{ fontSize: "0.85rem" }}>No pending KOT orders currently. Orders placed by waiters will appear here automatically.</p>
+              <div className="glass-panel" style={{ textAlign: "center", padding: "4rem 1.5rem", color: "var(--text-muted)", background: "#ffffff" }}>
+                <CheckCircle style={{ width: "52px", height: "52px", color: "#b45309", marginBottom: "1rem" }} />
+                <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+                  Kitchen Queue All Clear!
+                </h3>
+                <p style={{ fontSize: "0.85rem", maxWidth: "450px", margin: "0 auto" }}>
+                  All orders have been prepared and served. New orders dispatched from floor tables will appear here instantly.
+                </p>
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.25rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", gap: "1rem" }}>
                 {sortedLiveOrders.map(o => {
                   const isDone = o.status === "done";
                   const isAnimating = animatingDoneOrders[o.id];
@@ -193,37 +212,64 @@ export default function KitchenPage() {
                       key={o.id}
                       className="glass-panel animate-fade-in"
                       style={{
-                        padding: "1.25rem",
+                        padding: "1.15rem",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "space-between",
-                        border: isDone ? "2px solid #34d399" : "1px solid rgba(255, 255, 255, 0.15)",
-                        background: isDone ? "rgba(16, 185, 129, 0.15)" : "#151d38",
-                        opacity: isAnimating ? 0.7 : 1
+                        border: isDone ? "2px solid #10b981" : "1px solid var(--border-color)",
+                        borderTop: isDone ? "4px solid #10b981" : "4px solid var(--brand-yellow)",
+                        background: isDone ? "rgba(16, 185, 129, 0.12)" : "#ffffff",
+                        opacity: isAnimating ? 0.6 : 1,
+                        transition: "all 0.25s ease"
                       }}
                     >
                       <div>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                          <div>
-                            <span style={{ fontSize: "1.1rem", fontWeight: 800, color: "#fff" }}>
-                              Table #{o.tableNumber}
+                        {/* KOT Header */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <span style={{
+                              background: isDone ? "#10b981" : "var(--brand-yellow)",
+                              color: "#000",
+                              fontWeight: 900,
+                              fontSize: "1rem",
+                              padding: "0.25rem 0.6rem",
+                              borderRadius: "6px"
+                            }}>
+                              T{o.tableNumber}
                             </span>
-                            <span style={{ fontSize: "0.75rem", color: "#94a3b8", marginLeft: "0.5rem" }}>
-                              {o.id}
+                            <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)" }}>
+                              KOT #{o.id}
                             </span>
                           </div>
 
                           <span className={isDone ? "badge badge-done" : "badge badge-preparing"}>
-                            {isDone ? "DONE (Shifting in 2s...)" : "PREPARING"}
+                            {isDone ? "DONE (Archiving...)" : "PREPARING"}
                           </span>
                         </div>
 
-                        <div style={{ fontSize: "0.75rem", color: "#cbd5e1", marginBottom: "1rem", display: "flex", justifyContent: "space-between" }}>
-                          <span>Waiter: <strong>{o.waiterName}</strong></span>
-                          <span>Time: {o.timestamp}</span>
+                        <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginBottom: "0.85rem", display: "flex", justifyContent: "space-between" }}>
+                          <span>Waiter: <strong style={{ color: "#0f172a" }}>{o.waiterName}</strong></span>
+                          <span>Time: <strong style={{ color: "#0f172a" }}>{o.timestamp}</strong></span>
                         </div>
 
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1rem" }}>
+                        {/* Special Kitchen Notes (if any) */}
+                        {o.notes && (
+                          <div style={{
+                            background: "rgba(252, 197, 0, 0.18)",
+                            border: "1px solid rgba(252, 197, 0, 0.4)",
+                            borderRadius: "8px",
+                            padding: "0.5rem 0.75rem",
+                            marginBottom: "0.85rem",
+                            fontSize: "0.78rem",
+                            color: "#b45309",
+                            fontWeight: 700
+                          }}>
+                            ⚠️ Note: {o.notes}
+                          </div>
+                        )}
+
+                        {/* Items Checklist */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem", marginBottom: "1rem" }}>
                           {o.items.map(item => {
                             const itemDone = item.status === "done";
                             return (
@@ -231,26 +277,27 @@ export default function KitchenPage() {
                                 key={item.id}
                                 onClick={() => handleToggleItem(o.id, item.id)}
                                 style={{
-                                  background: itemDone ? "rgba(16, 185, 129, 0.2)" : "#0b1329",
-                                  border: itemDone ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
+                                  background: itemDone ? "rgba(16, 185, 129, 0.15)" : "var(--bg-card-secondary)",
+                                  border: itemDone ? "1px solid rgba(16, 185, 129, 0.35)" : "1px solid var(--border-color)",
                                   borderRadius: "8px",
-                                  padding: "0.6rem 0.8rem",
+                                  padding: "0.65rem 0.8rem",
                                   cursor: "pointer",
                                   display: "flex",
                                   alignItems: "center",
-                                  justifyContent: "space-between"
+                                  justifyContent: "space-between",
+                                  minHeight: "44px"
                                 }}
                               >
                                 <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                                   {itemDone ? (
-                                    <CheckSquare style={{ width: "18px", height: "18px", color: "#34d399" }} />
+                                    <CheckSquare style={{ width: "18px", height: "18px", color: "#10b981" }} />
                                   ) : (
-                                    <Square style={{ width: "18px", height: "18px", color: "#94a3b8" }} />
+                                    <Square style={{ width: "18px", height: "18px", color: "#b45309" }} />
                                   )}
                                   <span style={{
                                     fontSize: "0.85rem",
-                                    fontWeight: 600,
-                                    color: itemDone ? "#34d399" : "#f8fafc",
+                                    fontWeight: 700,
+                                    color: itemDone ? "#047857" : "#0f172a",
                                     textDecoration: itemDone ? "line-through" : "none"
                                   }}>
                                     {item.name}
@@ -258,12 +305,12 @@ export default function KitchenPage() {
                                 </div>
 
                                 <span style={{
-                                  background: "rgba(255, 255, 255, 0.1)",
-                                  color: "#fff",
-                                  fontWeight: 800,
+                                  background: itemDone ? "rgba(16, 185, 129, 0.25)" : "rgba(252, 197, 0, 0.25)",
+                                  color: itemDone ? "#047857" : "#b45309",
+                                  fontWeight: 900,
                                   fontSize: "0.8rem",
-                                  padding: "0.15rem 0.5rem",
-                                  borderRadius: "12px"
+                                  padding: "0.2rem 0.55rem",
+                                  borderRadius: "6px"
                                 }}>
                                   x{item.quantity}
                                 </span>
@@ -273,19 +320,21 @@ export default function KitchenPage() {
                         </div>
                       </div>
 
+                      {/* Complete Entire KOT Button */}
                       <button
                         onClick={() => handleMarkEntireOrderDone(o)}
                         disabled={isDone}
-                        className="glass-button glass-button-success"
+                        className={isDone ? "khandoli-btn-black" : "khandoli-btn-yellow"}
                         style={{
                           width: "100%",
                           justifyContent: "center",
                           fontSize: "0.85rem",
-                          opacity: isDone ? 0.6 : 1
+                          opacity: isDone ? 0.6 : 1,
+                          padding: "0.65rem"
                         }}
                       >
                         <CheckCircle style={{ width: "16px", height: "16px" }} />
-                        {isDone ? "Completed! Shifting..." : "Mark Entire Order Done"}
+                        <span>{isDone ? "Completed! Archiving..." : "Complete Entire KOT"}</span>
                       </button>
                     </div>
                   );
@@ -297,19 +346,33 @@ export default function KitchenPage() {
 
         {/* History Grid */}
         {activeTab === "history" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.25rem" }}>
-            {history.map(h => (
-              <div key={h.id} className="glass-panel" style={{ padding: "1.25rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                  <span style={{ fontWeight: 800, color: "#fff" }}>Table #{h.tableNumber}</span>
-                  <span className="badge badge-done">Completed</span>
-                </div>
-                <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>KOT #{h.id} • Waiter: {h.waiterName}</div>
+          <div>
+            {history.length === 0 ? (
+              <div className="glass-panel" style={{ textAlign: "center", padding: "3rem", color: "var(--text-muted)", background: "#ffffff" }}>
+                No completed orders recorded today yet.
               </div>
-            ))}
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: "1rem" }}>
+                {history.map(h => (
+                  <div key={h.id} className="glass-panel" style={{ padding: "1.15rem", borderLeft: "4px solid #10b981", background: "#ffffff" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                      <span style={{ fontWeight: 900, color: "#0f172a", fontSize: "1rem" }}>Table #{h.tableNumber}</span>
+                      <span className="badge badge-done">Completed</span>
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "0.5rem" }}>
+                      KOT #{h.id} • Waiter: {h.waiterName} • {h.timestamp}
+                    </div>
+                    <div style={{ fontSize: "0.78rem", color: "#334155" }}>
+                      {h.items?.map(it => `${it.name} (x${it.quantity})`).join(", ")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
   );
 }
+

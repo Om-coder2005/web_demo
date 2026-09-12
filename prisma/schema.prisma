@@ -1,0 +1,200 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+//  FRANCHISE & OUTLETS
+// ─────────────────────────────────────────────
+
+model Outlet {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  address      String
+  phone        String   @default("")
+  status       String   @default("Active") // Active, Inactive
+  dailyRevenue Float    @default(0)
+  staffCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  users             User[]
+  machineCredential MachineCredential?
+  menuItems         MenuItem[]
+  tables            Table[]
+  orders            Order[]
+}
+
+// ─────────────────────────────────────────────
+//  USERS & AUTHENTICATION
+// ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole
+  outletId     String?
+  outlet       Outlet?  @relation(fields: [outletId], references: [id])
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  billEdits BillAuditLog[]
+  stockLogs StockLog[]
+}
+
+enum UserRole {
+  franchise_owner
+  hotel_owner
+  machine
+  waiter
+  kitchen
+}
+
+model OtpSession {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model MachineCredential {
+  id            String   @id @default(cuid())
+  outletId      String   @unique
+  outlet        Outlet   @relation(fields: [outletId], references: [id])
+  machineEmail  String   @unique
+  passwordHash  String
+  plainPassword String // Shown once to owner only, hashed stored separately
+  apiToken      String   @unique
+  isOnline      Boolean  @default(false)
+  lastHeartbeat DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+//  MENU & STOCK
+// ─────────────────────────────────────────────
+
+model MenuItem {
+  id                String  @id @default(cuid())
+  outletId          String
+  outlet            Outlet  @relation(fields: [outletId], references: [id])
+  name              String
+  category          String
+  price             Float
+  description       String  @default("")
+  prepTime          String  @default("10 mins")
+  available         Boolean @default(true)
+  trackStock        Boolean @default(false)
+  stockQuantity     Int     @default(0)
+  lowStockThreshold Int     @default(10)
+
+  orderItems OrderItem[]
+  stockLogs  StockLog[]
+
+  @@index([outletId])
+}
+
+model StockLog {
+  id             String   @id @default(cuid())
+  menuItemId     String
+  menuItem       MenuItem @relation(fields: [menuItemId], references: [id])
+  changeQuantity Int      // positive = added, negative = deducted
+  reason         String   // "order_dispatch", "manual_add", "manual_remove", "correction"
+  updatedBy      String
+  user           User     @relation(fields: [updatedBy], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+//  TABLES
+// ─────────────────────────────────────────────
+
+model Table {
+  id             String  @id @default(cuid())
+  outletId       String
+  outlet         Outlet  @relation(fields: [outletId], references: [id])
+  number         Int
+  capacity       Int     @default(4)
+  status         String  @default("Available") // Available, Occupied, Billed
+  currentOrderId String?
+
+  @@unique([outletId, number])
+  @@index([outletId])
+}
+
+// ─────────────────────────────────────────────
+//  ORDERS & KOT
+// ─────────────────────────────────────────────
+
+model Order {
+  id           String      @id @default(cuid())
+  outletId     String
+  outlet       Outlet      @relation(fields: [outletId], references: [id])
+  tableNumber  Int
+  waiterName   String
+  status       OrderStatus @default(preparing)
+  totalAmount  Float       @default(0)
+  discount     Float       @default(0)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  completedAt  DateTime?
+
+  items      OrderItem[]
+  auditLogs  BillAuditLog[]
+
+  @@index([outletId, status])
+  @@index([outletId, tableNumber])
+}
+
+enum OrderStatus {
+  preparing
+  done
+  billed
+}
+
+model OrderItem {
+  id         String @id @default(cuid())
+  orderId    String
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  name       String
+  category   String
+  price      Float
+  quantity   Int
+  status     String @default("preparing") // preparing, done
+
+  @@index([orderId])
+}
+
+model BillAuditLog {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  modifiedById  String
+  modifiedBy    User     @relation(fields: [modifiedById], references: [id])
+  previousTotal Float
+  newTotal      Float
+  changeReason  String
+  changeDetails Json     // JSON diff of what changed (items added/removed/qty changed)
+  createdAt     DateTime @default(now())
+
+  @@index([orderId])
+}

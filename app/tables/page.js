@@ -93,13 +93,23 @@ export default function TablesPage() {
     setSelectedTable(null);
   };
 
+  const [statusFilter, setStatusFilter] = useState("All");
+
   if (!user) return null;
 
+  const filteredTables = statusFilter === "All" 
+    ? tables 
+    : tables.filter(t => t.status.toLowerCase() === statusFilter.toLowerCase());
+
+  const availableCount = tables.filter(t => t.status === "Available").length;
+  const occupiedCount = tables.filter(t => t.status === "Occupied").length;
+  const billedCount = tables.filter(t => t.status === "Billed").length;
+
   return (
-    <div style={{ minHeight: "100vh", background: "#0b1329", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column" }} className="mobile-bottom-space">
       <Navbar />
 
-      <div style={{ padding: "1.5rem 2rem", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
+      <div style={{ padding: "clamp(1rem, 2.5vw, 2rem)", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
         {/* Consolidated KOT Top Item Banner */}
         <KOTItemSummary orders={orders} />
 
@@ -108,34 +118,72 @@ export default function TablesPage() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "1.5rem"
+          marginBottom: "1.25rem",
+          flexWrap: "wrap",
+          gap: "1rem"
         }}>
           <div>
-            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#fff" }}>
-              Restaurant Table Layout & Live POS Orders
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+              <span className="badge badge-khandoli">Floor POS</span>
+              <span style={{ fontSize: "0.78rem", color: "#b45309", fontWeight: 700 }}>
+                {user.hotelName || "Islampur Branch"}
+              </span>
+            </div>
+            <h1 style={{ fontSize: "clamp(1.3rem, 3vw, 1.8rem)", fontWeight: 900, color: "#0f172a", textTransform: "uppercase" }}>
+              Table Layout & Live Orders
             </h1>
-            <p style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
-              Click any table to open current order KOT and add items from menu
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              Tap any table to open current KOT order, add items, or mark as billed.
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: "1rem" }}>
-            <span className="badge badge-available">Available ({tables.filter(t => t.status === "Available").length})</span>
-            <span className="badge badge-occupied">Occupied ({tables.filter(t => t.status === "Occupied").length})</span>
-            <span className="badge badge-billed">Billed ({tables.filter(t => t.status === "Billed").length})</span>
+          {/* Table Status Filter Chips */}
+          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+            {[
+              { label: "All", count: tables.length },
+              { label: "Available", count: availableCount },
+              { label: "Occupied", count: occupiedCount },
+              { label: "Billed", count: billedCount }
+            ].map(tab => {
+              const isSelected = statusFilter === tab.label;
+              return (
+                <button
+                  key={tab.label}
+                  onClick={() => setStatusFilter(tab.label)}
+                  style={{
+                    background: isSelected ? "var(--brand-yellow)" : "#ffffff",
+                    color: isSelected ? "#000000" : "var(--text-muted)",
+                    border: isSelected ? "1px solid var(--brand-yellow)" : "1px solid var(--border-color)",
+                    padding: "0.35rem 0.75rem",
+                    borderRadius: "8px",
+                    fontSize: "0.75rem",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease"
+                  }}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Table Grid */}
+        {/* Table Grid (Responsive: 2 cols on mobile, 3-4 on tablet, 4-6 on desktop) */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-          gap: "1.25rem"
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 170px), 1fr))",
+          gap: "1rem"
         }}>
-          {tables.map(t => {
+          {filteredTables.map(t => {
             const hasOrder = orders.find(o => o.tableNumber === t.number && o.status === "preparing");
             const itemCount = hasOrder ? hasOrder.items.reduce((acc, curr) => acc + curr.quantity, 0) : 0;
             const orderTotal = hasOrder ? hasOrder.items.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0).toFixed(2) : "0.00";
+
+            const isOccupied = t.status === "Occupied";
+            const isBilled = t.status === "Billed";
 
             return (
               <div
@@ -143,73 +191,78 @@ export default function TablesPage() {
                 onClick={() => handleTableClick(t)}
                 className="glass-panel"
                 style={{
-                  padding: "1.5rem",
+                  padding: "1.15rem",
                   cursor: "pointer",
-                  transition: "all 0.25s ease",
-                  border: t.status === "Occupied" 
-                    ? "1px solid rgba(239, 68, 68, 0.4)" 
-                    : t.status === "Billed" 
-                    ? "1px solid rgba(59, 130, 246, 0.4)" 
-                    : "1px solid rgba(16, 185, 129, 0.3)",
-                  background: t.status === "Occupied" 
-                    ? "rgba(239, 68, 68, 0.1)" 
-                    : t.status === "Billed" 
-                    ? "rgba(59, 130, 246, 0.1)" 
-                    : "#151d38"
+                  transition: "all 0.2s ease",
+                  border: isOccupied 
+                    ? "2px solid var(--brand-yellow)" 
+                    : isBilled 
+                    ? "1px solid rgba(59, 130, 246, 0.5)" 
+                    : "1px solid var(--border-color)",
+                  background: isOccupied 
+                    ? "rgba(252, 197, 0, 0.12)" 
+                    : "#ffffff"
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-4px)"}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-3px)"}
                 onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+                {/* Card Header: Table Number & Status */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.85rem" }}>
                   <div style={{
-                    width: "44px",
-                    height: "44px",
+                    width: "42px",
+                    height: "42px",
                     borderRadius: "10px",
-                    background: t.status === "Occupied" ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)",
+                    background: isOccupied ? "var(--brand-yellow)" : "var(--bg-card-secondary)",
+                    color: isOccupied ? "#000000" : "#0f172a",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontWeight: 800,
-                    fontSize: "1.2rem",
-                    color: t.status === "Occupied" ? "#f87171" : "#34d399"
+                    fontWeight: 900,
+                    fontSize: "1.15rem",
+                    boxShadow: isOccupied ? "0 2px 8px rgba(252, 197, 0, 0.3)" : "none"
                   }}>
                     T{t.number}
                   </div>
-                  <span className={`badge ${t.status === "Occupied" ? "badge-occupied" : t.status === "Billed" ? "badge-billed" : "badge-available"}`}>
+                  <span className={`badge ${isOccupied ? "badge-occupied" : isBilled ? "badge-billed" : "badge-available"}`}>
                     {t.status}
                   </span>
                 </div>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Capacity: {t.capacity} Seats</div>
+                {/* Card Body: Info */}
+                <div style={{ marginBottom: "0.85rem", minHeight: "44px" }}>
+                  <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                    Seats: {t.capacity} Persons
+                  </div>
                   {hasOrder ? (
-                    <div style={{ marginTop: "0.5rem" }}>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#f8fafc" }}>
-                        KOT #{hasOrder.id} • {itemCount} Items
+                    <div style={{ marginTop: "0.35rem" }}>
+                      <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#0f172a" }}>
+                        KOT #{hasOrder.id} • {itemCount} items
                       </div>
-                      <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#34d399", marginTop: "0.2rem" }}>
-                        Rs {orderTotal}
+                      <div style={{ fontSize: "1.05rem", fontWeight: 900, color: "#b45309", marginTop: "0.15rem" }}>
+                        ₹{orderTotal}
                       </div>
                     </div>
                   ) : (
-                    <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.5rem" }}>
-                      No active order
+                    <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "0.35rem" }}>
+                      Ready for guests
                     </div>
                   )}
                 </div>
 
+                {/* Card Footer: Quick Action Indicator */}
                 <div style={{
-                  background: "rgba(0,0,0,0.25)",
-                  padding: "0.5rem 0.75rem",
+                  background: isOccupied ? "rgba(252, 197, 0, 0.2)" : "var(--bg-card-secondary)",
+                  color: isOccupied ? "#b45309" : "var(--text-muted)",
+                  padding: "0.45rem 0.65rem",
                   borderRadius: "8px",
-                  fontSize: "0.75rem",
-                  color: "#cbd5e1",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between"
                 }}>
-                  <span>{hasOrder ? "Edit / Add Order" : "Take New Order"}</span>
-                  <Plus style={{ width: "14px", height: "14px", color: "#818cf8" }} />
+                  <span>{hasOrder ? "Modify Order" : "New Order"}</span>
+                  <Plus style={{ width: "13px", height: "13px" }} />
                 </div>
               </div>
             );

@@ -17,82 +17,113 @@ export default function KOTItemSummary({ orders }) {
   });
 
   const aggregatedList = Object.entries(itemCounts);
+  const totalItemsToCook = aggregatedList.reduce((acc, curr) => acc + curr[1], 0);
 
   return (
     <div className="glass-panel" style={{
-      padding: "1.25rem 1.5rem",
-      marginBottom: "1.5rem",
-      background: "#151d38",
-      border: "1px solid rgba(79, 70, 229, 0.3)"
+      padding: "1rem 1.25rem",
+      marginBottom: "1.25rem",
+      background: "#ffffff",
+      border: "2px solid #000000",
+      boxShadow: "4px 4px 0px #000000"
     }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: "0.75rem",
+        flexWrap: "wrap",
+        gap: "0.5rem"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
           <div style={{
-            background: "rgba(245, 158, 11, 0.15)",
-            padding: "0.35rem",
+            background: "var(--brand-yellow)",
+            color: "#000000",
+            padding: "0.4rem",
             borderRadius: "8px",
+            border: "2px solid #000000",
             display: "flex",
-            alignItems: "center"
+            alignItems: "center",
+            justifyContent: "center"
           }}>
-            <Flame style={{ color: "#fbbf24", width: "20px", height: "20px" }} />
+            <Flame style={{ width: "18px", height: "18px" }} />
           </div>
           <div>
-            <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#f8fafc" }}>
-              Live Kitchen Consolidated Summary
+            <h3 className="font-mellos" style={{ fontSize: "0.95rem", fontWeight: 900, color: "#000000", textTransform: "uppercase" }}>
+              Live Kitchen Consolidated Prep Counter
             </h3>
-            <p style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>
-              Total items currently preparing across all tables
+            <p className="font-standard" style={{ fontSize: "0.72rem", color: "#333333", fontWeight: 600 }}>
+              Total dishes currently being prepared across all active tables
             </p>
           </div>
         </div>
-        <span className="badge badge-preparing" style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-          <AlertCircle style={{ width: "12px", height: "12px" }} />
-          {aggregatedList.reduce((acc, curr) => acc + curr[1], 0)} Items To Prepare
+
+        <span className="font-mellos" style={{
+          background: "var(--brand-yellow)",
+          color: "#000000",
+          fontSize: "0.75rem",
+          fontWeight: 900,
+          padding: "0.35rem 0.75rem",
+          borderRadius: "6px",
+          border: "2px solid #000000",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.35rem",
+          textTransform: "uppercase",
+          letterSpacing: "0.03em"
+        }}>
+          <AlertCircle style={{ width: "13px", height: "13px" }} />
+          <span>{totalItemsToCook} Dishes In Queue</span>
         </span>
       </div>
 
       {aggregatedList.length === 0 ? (
-        <div style={{
+        <div className="font-standard" style={{
           textAlign: "center",
           padding: "1rem",
-          color: "#94a3b8",
-          fontSize: "0.85rem",
-          background: "rgba(0,0,0,0.2)",
-          borderRadius: "8px"
+          color: "#333333",
+          fontSize: "0.82rem",
+          background: "#ffffff",
+          borderRadius: "8px",
+          border: "2px dashed #000000",
+          fontWeight: 600
         }}>
-          No items currently preparing. All active orders are up to date! 🎉
+          No dishes currently preparing. All active orders are served! 🍳
         </div>
       ) : (
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-          gap: "0.75rem"
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 180px), 1fr))",
+          gap: "0.6rem"
         }}>
           {aggregatedList.map(([itemName, count]) => (
             <div
               key={itemName}
               style={{
-                background: "rgba(11, 19, 41, 0.8)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                borderRadius: "10px",
-                padding: "0.6rem 0.9rem",
+                background: "#ffffff",
+                border: "2px solid #000000",
+                borderRadius: "8px",
+                padding: "0.55rem 0.8rem",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between"
+                justifyContent: "space-between",
+                gap: "0.5rem"
               }}
             >
-              <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#f1f5f9" }}>
+              <span className="font-mellos" style={{ fontSize: "0.82rem", fontWeight: 800, color: "#000000", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {itemName}
               </span>
-              <span style={{
-                background: "#4f46e5",
-                color: "#fff",
-                fontWeight: 800,
-                fontSize: "0.9rem",
-                padding: "0.2rem 0.6rem",
-                borderRadius: "20px",
-                minWidth: "28px",
-                textAlign: "center"
+              <span className="font-mellos" style={{
+                background: "var(--brand-yellow)",
+                color: "#000000",
+                fontWeight: 900,
+                fontSize: "0.85rem",
+                padding: "0.15rem 0.55rem",
+                borderRadius: "12px",
+                border: "1px solid #000000",
+                minWidth: "26px",
+                textAlign: "center",
+                flexShrink: 0
               }}>
                 {count}
               </span>
@@ -103,3 +134,4 @@ export default function KOTItemSummary({ orders }) {
     </div>
   );
 }
+

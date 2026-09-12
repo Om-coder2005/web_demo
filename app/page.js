@@ -3,226 +3,301 @@
 import Link from "next/link";
 import Hero3D from "../components/Hero3D.js";
 import { 
-  Store, 
   ChefHat, 
   UtensilsCrossed, 
   Building2, 
   TrendingUp, 
-  ShieldCheck,
   ArrowRight,
-  Sparkles
+  Flame,
+  Store,
+  CheckCircle2,
+  MapPin
 } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden", background: "#0b1329" }}>
+    <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden", background: "#ffffff" }}>
       {/* ThreeJS Floating 3D Background */}
       <Hero3D />
 
-      {/* Overlay gradient */}
+      {/* Soft light tint overlay */}
       <div style={{
         position: "absolute",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        background: "rgba(11, 19, 41, 0.8)",
+        background: "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.95) 80%)",
         zIndex: 1,
         pointerEvents: "none"
       }} />
 
       {/* Hero Header Nav */}
-      <div style={{
+      <header style={{
         position: "relative",
         zIndex: 10,
-        padding: "1.5rem 3rem",
+        padding: "1.2rem 1.5rem",
+        maxWidth: "1320px",
+        margin: "0 auto",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: "1rem"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <div style={{
             width: "42px",
             height: "42px",
             borderRadius: "10px",
-            background: "#4f46e5",
+            background: "var(--brand-yellow)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center"
+            justifyContent: "center",
+            fontSize: "1.4rem",
+            boxShadow: "0 2px 10px rgba(252, 197, 0, 0.35)"
           }}>
-            <Store style={{ color: "white", width: "24px", height: "24px" }} />
+            🍳
           </div>
-          <span style={{ fontWeight: 800, fontSize: "1.3rem", color: "#fff", letterSpacing: "-0.5px" }}>
-            NextBills <span style={{ color: "#4f46e5" }}>POS</span>
-          </span>
+          <div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "0.4rem" }}>
+              <span style={{ fontWeight: 900, fontSize: "1.25rem", color: "#0f172a", letterSpacing: "0.02em", textTransform: "uppercase" }}>
+                KHANDOLI
+              </span>
+              <span style={{ fontSize: "0.65rem", fontWeight: 800, color: "#b45309", background: "rgba(252, 197, 0, 0.2)", padding: "0.15rem 0.4rem", borderRadius: "4px" }}>
+                POS
+              </span>
+            </div>
+            <span style={{ display: "block", fontSize: "0.7rem", color: "var(--text-muted)", fontWeight: 600 }}>
+              Nitin's Canteen · 11 Branches Across Maharashtra
+            </span>
+          </div>
         </div>
 
-        <Link href="/login" className="glass-button" style={{ padding: "0.6rem 1.4rem" }}>
-          <ShieldCheck style={{ width: "18px", height: "18px" }} /> Launch NextBills Portal
-        </Link>
-      </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <Link href="/login" className="khandoli-btn-yellow" style={{ fontSize: "0.82rem", padding: "0.55rem 1.15rem" }}>
+            <span>Launch POS Portal</span>
+            <ArrowRight style={{ width: "16px", height: "16px" }} />
+          </Link>
+        </div>
+      </header>
 
       {/* Hero Body Content */}
-      <div style={{
+      <main style={{
         position: "relative",
         zIndex: 10,
         maxWidth: "1200px",
-        margin: "4rem auto 0",
-        padding: "0 2rem",
+        margin: "2.5rem auto 0",
+        padding: "0 1.25rem",
         textAlign: "center"
       }}>
-        <div style={{
+        {/* Top Badge: 70 Years One Taste */}
+        <div className="font-mellos" style={{
           display: "inline-flex",
           alignItems: "center",
           gap: "0.5rem",
-          padding: "0.4rem 1rem",
-          borderRadius: "20px",
-          background: "rgba(79, 70, 229, 0.2)",
-          border: "1px solid rgba(79, 70, 229, 0.4)",
-          color: "#818cf8",
-          fontSize: "0.85rem",
-          fontWeight: 600,
-          marginBottom: "1.5rem"
+          padding: "0.45rem 1rem",
+          borderRadius: "8px",
+          background: "var(--brand-yellow)",
+          color: "#000000",
+          fontSize: "0.82rem",
+          fontWeight: 900,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          marginBottom: "1.5rem",
+          border: "2px solid #000000",
+          boxShadow: "2px 2px 0px #000000"
         }}>
-          <Sparkles style={{ width: "16px", height: "16px", color: "#ec4899" }} /> Next-Gen Multi-Role POS & Kitchen Display System
+          <Flame style={{ width: "16px", height: "16px", color: "#000000" }} />
+          <span>70 YEARS · ONE TASTE · 11 BRANCHES</span>
         </div>
 
-        <h1 style={{
-          fontSize: "3.5rem",
+        {/* Hero Title */}
+        <h1 className="font-sherly" style={{
+          fontSize: "clamp(2.2rem, 6vw, 4.2rem)",
           fontWeight: 900,
-          lineHeight: 1.15,
-          color: "#fff",
+          lineHeight: 1.1,
+          color: "#000000",
           marginBottom: "1.25rem",
-          letterSpacing: "-1px"
+          textTransform: "uppercase",
+          letterSpacing: "0.01em"
         }}>
-          Revolutionize Outlet & <br />
-          <span style={{ color: "#4f46e5" }}>
-            Franchise Operations with NextBills
+          KHANDOLI NITIN'S CANTEEN <br />
+          <span style={{ color: "#000000", background: "var(--brand-yellow)", padding: "0.1rem 0.5rem", borderRadius: "6px", border: "2px solid #000000" }}>
+            POS & KITCHEN OPERATIONS
           </span>
         </h1>
 
-        <p style={{
-          fontSize: "1.15rem",
-          color: "#94a3b8",
-          maxWidth: "750px",
+        <p className="font-standard" style={{
+          fontSize: "clamp(0.95rem, 2vw, 1.15rem)",
+          color: "#333333",
+          maxWidth: "780px",
           margin: "0 auto 2.5rem",
-          lineHeight: 1.6
+          lineHeight: 1.6,
+          fontWeight: 600
         }}>
-          Real-time synchronized order dispatches, consolidated Kitchen Display system with aggregated KOT item count summaries, multi-franchise analytics, and full Excel menu integration.
+          Kolhapur's iconic 70-year food heritage, powered by a dedicated high-speed Point-of-Sale system. Real-time waiter ordering, live KOT kitchen queue display, and multi-branch analytics across Maharashtra.
         </p>
 
         {/* Action Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginBottom: "4rem" }}>
-          <Link href="/login" className="glass-button" style={{
-            fontSize: "1rem",
+        <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginBottom: "3.5rem" }}>
+          <Link href="/login" className="khandoli-btn-yellow" style={{
+            fontSize: "0.95rem",
             padding: "0.85rem 2rem",
-            borderRadius: "10px"
+            minWidth: "200px"
           }}>
-            Explore Demo Roles <ArrowRight style={{ width: "18px", height: "18px" }} />
+            <span>Select Staff Role</span>
+            <ArrowRight style={{ width: "18px", height: "18px" }} />
           </Link>
-          <Link href="/tables" className="glass-button" style={{
-            fontSize: "1rem",
+          <Link href="/tables" className="khandoli-btn-black" style={{
+            fontSize: "0.95rem",
             padding: "0.85rem 2rem",
-            borderRadius: "10px",
-            background: "rgba(255, 255, 255, 0.05)"
+            minWidth: "180px"
           }}>
-            Waiter Table View
+            <UtensilsCrossed style={{ width: "18px", height: "18px", color: "var(--brand-yellow)" }} />
+            <span>Table Layout</span>
+          </Link>
+          <Link href="/kitchen" className="khandoli-btn-outline" style={{
+            fontSize: "0.95rem",
+            padding: "0.85rem 2rem",
+            minWidth: "180px"
+          }}>
+            <ChefHat style={{ width: "18px", height: "18px", color: "#000000" }} />
+            <span>Kitchen Queue</span>
           </Link>
         </div>
 
         {/* Feature Role Cards */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-          gap: "1.5rem",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
+          gap: "1.25rem",
           textAlign: "left",
-          paddingBottom: "4rem"
+          paddingBottom: "5rem"
         }}>
-          <div className="glass-panel" style={{ padding: "1.5rem" }}>
+          {/* Franchise Card */}
+          <div className="glass-panel" style={{ padding: "1.5rem", background: "#ffffff", borderTop: "6px solid var(--brand-yellow)" }}>
             <div style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "10px",
-              background: "rgba(79, 70, 229, 0.2)",
+              width: "44px",
+              height: "44px",
+              borderRadius: "8px",
+              background: "var(--brand-yellow)",
+              border: "2px solid #000000",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: "1rem"
             }}>
-              <Building2 style={{ width: "24px", height: "24px", color: "#818cf8" }} />
+              <Building2 style={{ width: "22px", height: "22px", color: "#000000" }} />
             </div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#fff", marginBottom: "0.5rem" }}>
-              Franchise Owner
+            <div className="font-mellos" style={{ fontSize: "0.7rem", fontWeight: 900, color: "#000000", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.3rem" }}>
+              Enterprise Overview
+            </div>
+            <h3 className="font-mellos" style={{ fontSize: "1.1rem", fontWeight: 900, color: "#000000", marginBottom: "0.5rem", textTransform: "uppercase" }}>
+              Franchise Analytics
             </h3>
-            <p style={{ fontSize: "0.85rem", color: "#94a3b8", lineHeight: 1.5 }}>
-              Monitor multiple outlet branches (Outlet 1, Outlet 2, Outlet 3), revenue analytics, and drill down into individual outlet owner views.
+            <p className="font-standard" style={{ fontSize: "0.82rem", color: "#333333", lineHeight: 1.5, fontWeight: 600 }}>
+              Monitor all 11 Maharashtra branches (Islampur, Kolhapur HQ, Satara, Pune), overall daily revenue, and outlet-level drilldown.
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: "1.5rem" }}>
+          {/* Outlet Manager Card */}
+          <div className="glass-panel" style={{ padding: "1.5rem", background: "#ffffff", borderTop: "6px solid #000000" }}>
             <div style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "10px",
-              background: "rgba(236, 72, 153, 0.2)",
+              width: "44px",
+              height: "44px",
+              borderRadius: "8px",
+              background: "#000000",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: "1rem"
             }}>
-              <TrendingUp style={{ width: "24px", height: "24px", color: "#ec4899" }} />
+              <Store style={{ width: "22px", height: "22px", color: "var(--brand-yellow)" }} />
             </div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#fff", marginBottom: "0.5rem" }}>
-              Outlet Owner
+            <div className="font-mellos" style={{ fontSize: "0.7rem", fontWeight: 900, color: "#000000", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.3rem" }}>
+              Branch Operations
+            </div>
+            <h3 className="font-mellos" style={{ fontSize: "1.1rem", fontWeight: 900, color: "#000000", marginBottom: "0.5rem", textTransform: "uppercase" }}>
+              Outlet Manager
             </h3>
-            <p style={{ fontSize: "0.85rem", color: "#94a3b8", lineHeight: 1.5 }}>
-              Track active kitchen staff, waiters, sales breakdown, table layouts, menu management, and real-time operational efficiency.
+            <p className="font-standard" style={{ fontSize: "0.82rem", color: "#333333", lineHeight: 1.5, fontWeight: 600 }}>
+              Manage branch staff (Chefs & Waiters), floor table arrangements, menu availability, and live billing metrics.
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: "1.5rem" }}>
+          {/* Waiter POS Card */}
+          <div className="glass-panel" style={{ padding: "1.5rem", background: "#ffffff", borderTop: "6px solid var(--brand-yellow)" }}>
             <div style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "10px",
-              background: "rgba(52, 211, 153, 0.2)",
+              width: "44px",
+              height: "44px",
+              borderRadius: "8px",
+              background: "var(--brand-yellow)",
+              border: "2px solid #000000",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: "1rem"
             }}>
-              <UtensilsCrossed style={{ width: "24px", height: "24px", color: "#34d399" }} />
+              <UtensilsCrossed style={{ width: "22px", height: "22px", color: "#000000" }} />
             </div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#fff", marginBottom: "0.5rem" }}>
-              Waiter POS Layout
+            <div className="font-mellos" style={{ fontSize: "0.7rem", fontWeight: 900, color: "#000000", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.3rem" }}>
+              Floor Service
+            </div>
+            <h3 className="font-mellos" style={{ fontSize: "1.1rem", fontWeight: 900, color: "#000000", marginBottom: "0.5rem", textTransform: "uppercase" }}>
+              Waiter POS & Tables
             </h3>
-            <p style={{ fontSize: "0.85rem", color: "#94a3b8", lineHeight: 1.5 }}>
-              Instant table view, seamless menu item additions from Excel sheet, live order modifications, and immediate KOT dispatching to kitchen.
+            <p className="font-standard" style={{ fontSize: "0.82rem", color: "#333333", lineHeight: 1.5, fontWeight: 600 }}>
+              Rapid table ordering from the 102-item Khandoli menu sheet, notes for kitchen, instant billing, and immediate KOT dispatch.
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: "1.5rem" }}>
+          {/* Kitchen Display Card */}
+          <div className="glass-panel" style={{ padding: "1.5rem", background: "#ffffff", borderTop: "6px solid #000000" }}>
             <div style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
-              background: "rgba(245, 158, 11, 0.2)",
+              width: "44px",
+              height: "44px",
+              borderRadius: "8px",
+              background: "#000000",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: "1rem"
             }}>
-              <ChefHat style={{ width: "24px", height: "24px", color: "#fbbf24" }} />
+              <ChefHat style={{ width: "22px", height: "22px", color: "var(--brand-yellow)" }} />
             </div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#fff", marginBottom: "0.5rem" }}>
+            <div className="font-mellos" style={{ fontSize: "0.7rem", fontWeight: 900, color: "#000000", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.3rem" }}>
+              Live KDS System
+            </div>
+            <h3 className="font-mellos" style={{ fontSize: "1.1rem", fontWeight: 900, color: "#000000", marginBottom: "0.5rem", textTransform: "uppercase" }}>
               Kitchen KOT Display
             </h3>
-            <p style={{ fontSize: "0.85rem", color: "#94a3b8", lineHeight: 1.5 }}>
-              Top aggregated item count summary for high UX efficiency, chronological KOT cards, item-level completion, and 2-sec transition to History tab.
+            <p className="font-standard" style={{ fontSize: "0.82rem", color: "#333333", lineHeight: 1.5, fontWeight: 600 }}>
+              Consolidated item prep counters (e.g. 5x Double Khandoli), item checklist, one-tap completion, and order history archive.
             </p>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer Banner */}
+      <footer style={{
+        position: "relative",
+        zIndex: 10,
+        borderTop: "3px solid var(--brand-yellow)",
+        background: "#f8fafc",
+        padding: "1.5rem 1.25rem",
+        textAlign: "center",
+        color: "var(--text-muted)",
+        fontSize: "0.78rem"
+      }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
+          <MapPin style={{ width: "14px", height: "14px", color: "#b45309" }} />
+          <span style={{ color: "#0f172a", fontWeight: 700 }}>Khandoli Nitin's Canteen</span>
+          <span>· Shivaji Udyam Nagar, Kolhapur · Islampur · Satara · Pune</span>
+        </div>
+        <p>© 2026 Khandoli Nitin's Canteen. POS & Kitchen Operations Management.</p>
+      </footer>
     </div>
   );
 }
+

@@ -25,15 +25,15 @@ export default function Hero3D() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // Create 3D floating geometrical "POS elements" (Cylinders for Plates/Coins, Torus for Donuts/Rings, Icosahedron for Orbs)
+    // Create 3D floating geometrical "POS elements" (Golden Serving Plates, Canteen Rings, Glowing Embers)
     const group = new THREE.Group();
 
-    // Plate 1 (Glowing Cyan Cylinder)
+    // Plate 1 (Signature Khandoli Golden Yellow Dish)
     const plateGeo = new THREE.CylinderGeometry(2.5, 2.5, 0.4, 32);
     const plateMat = new THREE.MeshPhongMaterial({
-      color: 0x6366f1,
+      color: 0xFCC500,
       wireframe: false,
-      shininess: 100,
+      shininess: 120,
       flatShading: false
     });
     const plate = new THREE.Mesh(plateGeo, plateMat);
@@ -41,21 +41,21 @@ export default function Hero3D() {
     plate.rotation.x = 0.5;
     group.add(plate);
 
-    // Torus (Donut representation)
+    // Torus (Matte Charcoal Ring with metallic sheen)
     const torusGeo = new THREE.TorusGeometry(1.8, 0.6, 16, 100);
     const torusMat = new THREE.MeshStandardMaterial({
-      color: 0xec4899,
-      roughness: 0.3,
+      color: 0x27272a,
+      roughness: 0.2,
       metalness: 0.8
     });
     const torus = new THREE.Mesh(torusGeo, torusMat);
     torus.position.set(4, -1, 1);
     group.add(torus);
 
-    // Floating Glowing Orbs (representing active orders / KOT updates)
+    // Floating Glowing Orb (Signature Egg Yolk Amber Glow)
     const orbGeo = new THREE.IcosahedronGeometry(1.2, 2);
     const orbMat = new THREE.MeshStandardMaterial({
-      color: 0x10b981,
+      color: 0xFCC500,
       roughness: 0.1,
       metalness: 0.9,
       wireframe: true
@@ -64,9 +64,9 @@ export default function Hero3D() {
     orb.position.set(0, -3, -2);
     group.add(orb);
 
-    // Additional floating particles
+    // Additional floating golden particles
     const particlesGeo = new THREE.BufferGeometry();
-    const particleCount = 120;
+    const particleCount = 140;
     const posArray = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount * 3; i++) {
@@ -80,9 +80,9 @@ export default function Hero3D() {
 
     const particlesMat = new THREE.PointsMaterial({
       size: 0.12,
-      color: 0x818cf8,
+      color: 0xFCC500,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.85
     });
 
     const particleMesh = new THREE.Points(particlesGeo, particlesMat);
@@ -90,15 +90,15 @@ export default function Hero3D() {
 
     scene.add(group);
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // Lights (Warm Golden & Neutral)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const pointLight1 = new THREE.PointLight(0x6366f1, 2, 50);
+    const pointLight1 = new THREE.PointLight(0xFCC500, 2.5, 50);
     pointLight1.position.set(10, 10, 10);
     scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0xec4899, 2, 50);
+    const pointLight2 = new THREE.PointLight(0xffa000, 1.8, 50);
     pointLight2.position.set(-10, -10, 10);
     scene.add(pointLight2);
 

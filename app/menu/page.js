@@ -57,6 +57,14 @@ export default function MenuPage() {
     setShowAddForm(false);
   };
 
+  const isNonVegOrEgg = (item) => {
+    const nonVegCategories = ['Khandoli', 'Eggs & More', 'Wraps', 'Khandoli Sandwiches', 'Mutton Kheema Pav'];
+    const nonVegKeywords = ['egg', 'khandoli', 'bhurji', 'omelette', 'omlet', 'kheema', 'mutton'];
+    if (nonVegCategories.includes(item.category)) return true;
+    const lower = item.name.toLowerCase();
+    return nonVegKeywords.some(kw => lower.includes(kw));
+  };
+
   const categories = ["All", ...Array.from(new Set(menu.map(m => m.category)))];
 
   const filteredMenu = menu.filter(m => {
@@ -66,123 +74,170 @@ export default function MenuPage() {
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0b1329", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column" }} className="mobile-bottom-space">
       <Navbar />
 
-      <div style={{ padding: "1.5rem 2rem", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
+      <div style={{ padding: "clamp(1rem, 2.5vw, 2rem)", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
         {/* Header */}
         <div style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "1.5rem",
+          marginBottom: "1.25rem",
           flexWrap: "wrap",
           gap: "1rem"
         }}>
           <div>
-            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <BookOpen style={{ color: "#4f46e5", width: "26px", height: "26px" }} /> Restaurant Menu Catalog
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+              <span className="badge badge-khandoli">Official Menu</span>
+              <span style={{ fontSize: "0.78rem", color: "#b45309", fontWeight: 700 }}>
+                Khandoli Nitin's Canteen
+              </span>
+            </div>
+            <h1 style={{ fontSize: "clamp(1.3rem, 3vw, 1.8rem)", fontWeight: 900, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem", textTransform: "uppercase" }}>
+              <BookOpen style={{ color: "#b45309", width: "26px", height: "26px" }} /> Menu Catalog ({menu.length} Dishes)
             </h1>
-            <p style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
-              Loaded {menu.length} dishes from Excel Menu Sheet with Rupee (Rs) pricing
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              Loaded from Islampur & Kolhapur branch Excel menu card with Rupee (₹) pricing
             </p>
           </div>
 
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="glass-button"
-            style={{ fontSize: "0.85rem" }}
+            className="khandoli-btn-yellow"
+            style={{ fontSize: "0.82rem", padding: "0.55rem 1.15rem" }}
           >
-            <Plus style={{ width: "16px", height: "16px" }} /> Add New Dish
+            <Plus style={{ width: "16px", height: "16px" }} />
+            <span>{showAddForm ? "Close Form" : "Add New Dish"}</span>
           </button>
         </div>
 
         {/* Search & Category Filter bar */}
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#151d38", padding: "0.5rem 0.85rem", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.1)", flex: 1, minWidth: "220px" }}>
-            <Search style={{ width: "16px", height: "16px", color: "#94a3b8" }} />
+        <div style={{ display: "flex", gap: "0.85rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            background: "var(--bg-card-secondary)",
+            padding: "0.55rem 0.85rem",
+            borderRadius: "10px",
+            border: "1px solid var(--border-color)",
+            flex: 1,
+            minWidth: "220px"
+          }}>
+            <Search style={{ width: "16px", height: "16px", color: "#b45309" }} />
             <input
               type="text"
-              placeholder="Search dish..."
+              placeholder="Search by dish name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ background: "none", border: "none", color: "#fff", outline: "none", fontSize: "0.85rem", width: "100%" }}
+              style={{ background: "none", border: "none", color: "#0f172a", outline: "none", fontSize: "0.85rem", width: "100%" }}
             />
           </div>
 
-          <div style={{ display: "flex", gap: "0.4rem", overflowX: "auto", paddingBottom: "0.25rem" }}>
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                style={{
-                  background: selectedCategory === cat ? "#4f46e5" : "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  color: "#fff",
-                  padding: "0.4rem 0.9rem",
-                  borderRadius: "20px",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap"
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Horizontal category chips */}
+          <div style={{ display: "flex", gap: "0.35rem", overflowX: "auto", paddingBottom: "0.25rem", maxWidth: "100%" }}>
+            {categories.map(cat => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    background: isSelected ? "var(--brand-yellow)" : "var(--bg-card-secondary)",
+                    border: isSelected ? "1px solid var(--brand-yellow)" : "1px solid var(--border-color)",
+                    color: isSelected ? "#000000" : "#0f172a",
+                    padding: "0.4rem 0.85rem",
+                    borderRadius: "20px",
+                    fontSize: "0.72rem",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease"
+                  }}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Add Item Form */}
         {showAddForm && (
           <form onSubmit={handleAddItemSubmit} className="glass-panel animate-fade-in" style={{
-            padding: "1.5rem",
-            marginBottom: "2rem",
-            background: "#151d38",
-            border: "1px solid #4f46e5"
+            padding: "1.25rem",
+            marginBottom: "1.5rem",
+            background: "#ffffff",
+            border: "2px solid var(--brand-yellow)"
           }}>
-            <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#fff", marginBottom: "1rem" }}>
-              Add New Dish
+            <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", marginBottom: "0.85rem" }}>
+              Add New Dish to Khandoli Menu
             </h3>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "0.85rem", marginBottom: "1rem" }}>
               <div>
-                <label style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Dish Name</label>
+                <label style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>Dish Name</label>
                 <input
                   type="text"
                   required
                   value={newItem.name}
                   onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                  placeholder="e.g. Cheese Butter Toast"
+                  placeholder="e.g. Cheese Khandoli Roll"
                   style={{
                     width: "100%",
-                    background: "#0b1329",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "var(--bg-card-secondary)",
+                    border: "1px solid var(--border-color)",
                     borderRadius: "8px",
-                    padding: "0.5rem 0.75rem",
-                    color: "#fff",
-                    marginTop: "0.2rem"
+                    padding: "0.55rem 0.75rem",
+                    color: "#0f172a",
+                    fontSize: "0.85rem",
+                    marginTop: "0.25rem"
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Price (Rs)</label>
+                <label style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>Category</label>
+                <select
+                  value={newItem.category}
+                  onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                  style={{
+                    width: "100%",
+                    background: "var(--bg-card-secondary)",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    padding: "0.55rem 0.75rem",
+                    color: "#0f172a",
+                    fontSize: "0.85rem",
+                    fontWeight: 700,
+                    marginTop: "0.25rem"
+                  }}
+                >
+                  {categories.filter(c => c !== "All").map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>Price (₹)</label>
                 <input
                   type="number"
                   step="1"
                   required
                   value={newItem.price}
                   onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                  placeholder="e.g. 50"
+                  placeholder="e.g. 90"
                   style={{
                     width: "100%",
-                    background: "#0b1329",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "var(--bg-card-secondary)",
+                    border: "1px solid var(--border-color)",
                     borderRadius: "8px",
-                    padding: "0.5rem 0.75rem",
-                    color: "#fff",
-                    marginTop: "0.2rem"
+                    padding: "0.55rem 0.75rem",
+                    color: "#0f172a",
+                    fontSize: "0.85rem",
+                    marginTop: "0.25rem"
                   }}
                 />
               </div>
@@ -192,21 +247,15 @@ export default function MenuPage() {
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                style={{
-                  background: "rgba(255,255,255,0.1)",
-                  border: "none",
-                  color: "#fff",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
+                className="khandoli-btn-outline"
+                style={{ fontSize: "0.8rem", padding: "0.45rem 1rem" }}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="glass-button glass-button-success"
-                style={{ fontSize: "0.85rem" }}
+                className="khandoli-btn-yellow"
+                style={{ fontSize: "0.8rem", padding: "0.45rem 1.25rem" }}
               >
                 Save Dish
               </button>
@@ -217,65 +266,83 @@ export default function MenuPage() {
         {/* Menu Cards Grid */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: "1.25rem"
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 250px), 1fr))",
+          gap: "1rem"
         }}>
-          {filteredMenu.map(m => (
-            <div
-              key={m.id}
-              className="glass-panel"
-              style={{
-                padding: "1.25rem",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                opacity: m.available ? 1 : 0.6,
-                background: "#151d38"
-              }}
-            >
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
-                  <span className="badge badge-preparing">{m.category}</span>
-                  <span className={`badge ${m.available ? "badge-available" : "badge-occupied"}`}>
-                    {m.available ? "In Stock" : "Out of Stock"}
-                  </span>
+          {filteredMenu.map(m => {
+            const eggDish = isNonVegOrEgg(m);
+
+            return (
+              <div
+                key={m.id}
+                className="glass-panel"
+                style={{
+                  padding: "1.15rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  opacity: m.available ? 1 : 0.55,
+                  background: "#ffffff",
+                  border: m.available ? "1px solid var(--border-color)" : "1px dashed var(--border-color)",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                    <span className="badge badge-preparing">{m.category}</span>
+                    <span className={`badge ${m.available ? "badge-available" : "badge-occupied"}`}>
+                      {m.available ? "In Stock" : "Unavailable"}
+                    </span>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.4rem", margin: "0.4rem 0 0.25rem" }}>
+                    <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", lineHeight: 1.3 }}>
+                      {m.name}
+                    </h3>
+                    <span style={{ fontSize: "0.8rem", flexShrink: 0 }}>
+                      {eggDish ? "🔴" : "🟢"}
+                    </span>
+                  </div>
+
+                  <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "0.85rem", lineHeight: 1.4 }}>
+                    {m.description}
+                  </p>
                 </div>
 
-                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#fff", margin: "0.5rem 0 0.3rem" }}>
-                  {m.name}
-                </h3>
-                <p style={{ fontSize: "0.8rem", color: "#94a3b8", marginBottom: "1rem", lineHeight: 1.4 }}>
-                  {m.description}
-                </p>
-              </div>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem" }}>
+                    <span style={{ fontSize: "1.25rem", fontWeight: 900, color: "#b45309" }}>
+                      ₹{m.price}
+                    </span>
+                    <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 600 }}>
+                      Prep: {m.prepTime}
+                    </span>
+                  </div>
 
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                  <span style={{ fontSize: "1.25rem", fontWeight: 800, color: "#34d399" }}>Rs {m.price}</span>
-                  <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>Prep: {m.prepTime}</span>
+                  <button
+                    onClick={() => handleToggleAvailability(m.id)}
+                    style={{
+                      width: "100%",
+                      background: m.available ? "rgba(239, 68, 68, 0.12)" : "rgba(16, 185, 129, 0.15)",
+                      border: m.available ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid rgba(16, 185, 129, 0.3)",
+                      color: m.available ? "#dc2626" : "#047857",
+                      padding: "0.5rem",
+                      borderRadius: "8px",
+                      fontSize: "0.78rem",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      textTransform: "uppercase"
+                    }}
+                  >
+                    {m.available ? "Toggle: Out of Stock" : "Toggle: Set Available"}
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => handleToggleAvailability(m.id)}
-                  style={{
-                    width: "100%",
-                    background: m.available ? "rgba(239, 68, 68, 0.15)" : "rgba(16, 185, 129, 0.15)",
-                    border: m.available ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid rgba(16, 185, 129, 0.3)",
-                    color: m.available ? "#f87171" : "#34d399",
-                    padding: "0.45rem",
-                    borderRadius: "8px",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    cursor: "pointer"
-                  }}
-                >
-                  {m.available ? "Mark Out of Stock" : "Mark Available"}
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
+

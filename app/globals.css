@@ -1,17 +1,48 @@
-/* Refined POS Styles (Clean Solid Colors, Micro-Interactions, No AI Gradients) */
+/* Khandoli Nitin's Canteen Design System (70 Years. One Taste.) */
+/* Primary Background: Pure White #FFFFFF */
+/* Secondary: Yellow #FCC500 */
+/* Borders, Boxes & UI Assets: Pure Black #000000 & Yellow #FCC500 */
+
+@font-face {
+  font-family: 'Mellos';
+  src: url('/fonts/Mellos.otf') format('opentype'),
+       url('/fonts/Mellos.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sherly Kitchen';
+  src: url('/fonts/Sherly Kitchen.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  --bg-dark: #0b1329;
-  --bg-card: #151d38;
-  --bg-card-hover: #1e2847;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --accent-primary: #4f46e5;
-  --accent-secondary: #e11d48;
+  --brand-yellow: #FCC500;
+  --brand-yellow-hover: #e5b200;
+  --brand-yellow-dark: #c49900;
+  --brand-yellow-subtle: rgba(252, 197, 0, 0.15);
+  --brand-black: #000000;
+  --bg-dark: #ffffff;
+  --bg-main: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fcfcfc;
+  --bg-card-secondary: #f8f9fa;
+  --border-color: #000000;
+  --border-subtle: #000000;
+  --accent-primary: #FCC500;
+  --accent-secondary: #000000;
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --accent-red: #ef4444;
+  --text-main: #000000;
+  --text-muted: #374151;
+  --font-standard: 'Helvetica', 'Helvetica Neue', Arial, sans-serif;
+  --font-mellos: 'Mellos', 'Helvetica', sans-serif;
+  --font-sherly: 'Sherly Kitchen', cursive, sans-serif;
 }
 
 * {
@@ -20,12 +51,25 @@
   padding: 0;
 }
 
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  font-family: var(--font-family);
+html, body {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-family: var(--font-standard);
   min-height: 100vh;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Font Helper Classes */
+.font-sherly {
+  font-family: var(--font-sherly);
+}
+.font-mellos {
+  font-family: var(--font-mellos);
+}
+.font-standard {
+  font-family: var(--font-standard);
 }
 
 /* Scrollbar styling */
@@ -34,52 +78,139 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b1329;
+  background: #ffffff;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #000000;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #FCC500;
 }
 
 /* Clean Solid Panel Utility */
 .glass-panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px #000000;
 }
 
+/* Khandoli Brand Buttons */
+.khandoli-btn-yellow {
+  background: var(--brand-yellow);
+  color: #000000;
+  border: 2px solid #000000;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-family: var(--font-mellos);
+  font-weight: 800;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  min-height: 44px;
+  box-shadow: 2px 2px 0px #000000;
+}
+.khandoli-btn-yellow:hover {
+  background: var(--brand-yellow-hover);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000000;
+}
+.khandoli-btn-yellow:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.khandoli-btn-black {
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #000000;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-family: var(--font-mellos);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  min-height: 44px;
+  box-shadow: 2px 2px 0px var(--brand-yellow);
+}
+.khandoli-btn-black:hover {
+  background: var(--brand-yellow);
+  color: #000000;
+  border-color: #000000;
+  box-shadow: 4px 4px 0px #000000;
+}
+.khandoli-btn-black:active {
+  transform: translate(1px, 1px);
+}
+
+.khandoli-btn-outline {
+  background: #ffffff;
+  color: #000000;
+  border: 2px solid #000000;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-family: var(--font-mellos);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  min-height: 44px;
+  box-shadow: 2px 2px 0px #000000;
+}
+.khandoli-btn-outline:hover {
+  border-color: #000000;
+  color: #000000;
+  background: var(--brand-yellow);
+  box-shadow: 4px 4px 0px #000000;
+}
+
+/* Legacy button mapping */
 .glass-button {
-  background: #4f46e5;
-  border: 1px solid #4338ca;
-  color: white;
+  background: var(--brand-yellow);
+  color: #000000;
+  border: 2px solid #000000;
   padding: 0.55rem 1.15rem;
   border-radius: 10px;
-  font-weight: 600;
+  font-family: var(--font-mellos);
+  font-weight: 800;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
+  min-height: 40px;
+  box-shadow: 2px 2px 0px #000000;
 }
-
 .glass-button:hover {
-  background: #4338ca;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+  background: var(--brand-yellow-hover);
+  box-shadow: 3px 3px 0px #000000;
 }
 
 .glass-button-success {
   background: #10b981;
-  border: 1px solid #059669;
-}
-.glass-button-success:hover {
-  background: #059669;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  color: #ffffff;
+  border: 2px solid #000000;
 }
 
 /* Animations */
@@ -94,40 +225,94 @@ body {
 
 /* Status Badges */
 .badge {
-  padding: 0.25rem 0.6rem;
+  padding: 0.3rem 0.65rem;
   border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-family: var(--font-mellos);
+  font-size: 0.72rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1.5px solid #000000;
+}
+
+.badge-khandoli {
+  background: var(--brand-yellow);
+  color: #000000;
 }
 
 .badge-preparing {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: #fef08a;
+  color: #000000;
 }
 
 .badge-done {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: #bbf7d0;
+  color: #000000;
 }
 
 .badge-available {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: #bbf7d0;
+  color: #000000;
 }
 
 .badge-occupied {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--brand-yellow);
+  color: #000000;
 }
 
 .badge-billed {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: #bfdbfe;
+  color: #000000;
 }
+
+/* Food Indicator Badges */
+.food-tag-egg {
+  background: #fecaca;
+  color: #991b1b;
+  border: 1.5px solid #000000;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.food-tag-veg {
+  background: #bbf7d0;
+  color: #166534;
+  border: 1.5px solid #000000;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Mobile & Touch Utilities */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-bottom-space {
+    padding-bottom: 5.5rem !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Safe area insets for notched phones */
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+
