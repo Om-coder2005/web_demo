@@ -262,6 +262,23 @@ export default function Navbar() {
 
         {/* Right Section: User Status & Mobile Toggle */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          {/* Sync & Offline Status Indicator */}
+          <div style={{
+            fontSize: "0.7rem",
+            fontWeight: 800,
+            padding: "0.25rem 0.6rem",
+            borderRadius: "12px",
+            background: "rgba(16, 185, 129, 0.15)",
+            color: "#047857",
+            border: "1px solid rgba(16, 185, 129, 0.3)",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.35rem"
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
+            <span>Local DB Ready</span>
+          </div>
+
           {/* User Role Badge (Desktop) */}
           <div className="desktop-only" style={{ textAlign: "right" }}>
             <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "#0f172a", maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

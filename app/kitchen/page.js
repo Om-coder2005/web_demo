@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import KOTItemSummary from "../../components/KOTItemSummary.js";
 import Navbar from "../../components/Navbar.js";
-import { getOrders, setOrders, getHistoryOrders, setHistoryOrders, getCurrentUser } from "../../lib/storage.js";
+import { getCurrentUser } from "../../lib/storage.js";
+import { OrderRepository } from "../../lib/offline/repositories.js";
 import { ChefHat, CheckCircle, Flame, History, CheckSquare, Square } from "lucide-react";
 import confetti from "canvas-confetti";
 import { canManageKitchen } from "../../lib/permissions.js";
@@ -18,100 +19,47 @@ export default function KitchenPage() {
   const machineStatus = useMachineConnectivity(user);
   const isReadOnly = !canManageKitchen(user?.role) || !machineStatus.online;
 
+  async function loadKitchenOrders() {
+    const res = await OrderRepository.getActiveOrders();
+    const active = (res.orders || []).filter((o) => o.status === "preparing");
+    const completed = (res.orders || []).filter((o) => o.status === "done");
+    setOrdersState(active);
+    setHistoryState(completed);
+  }
+
   useEffect(() => {
     setUser(getCurrentUser());
-    setOrdersState(getOrders());
-    setHistoryState(getHistoryOrders());
+    loadKitchenOrders();
 
-    const handleUpdate = () => {
-      setOrdersState(getOrders());
-      setHistoryState(getHistoryOrders());
-    };
-
+    const handleUpdate = () => loadKitchenOrders();
     window.addEventListener("pos_data_update", handleUpdate);
-    return () => window.removeEventListener("pos_data_update", handleUpdate);
+    window.addEventListener("pos_sync_status_change", handleUpdate);
+
+    return () => {
+      window.removeEventListener("pos_data_update", handleUpdate);
+      window.removeEventListener("pos_sync_status_change", handleUpdate);
+    };
   }, []);
 
-  const handleToggleItem = (orderId, itemId) => {
+  const handleToggleItem = async (orderId, itemId) => {
     if (isReadOnly) return;
-    let currentOrders = [...orders];
+    const targetOrder = orders.find((o) => o.id === orderId);
+    const targetItem = targetOrder?.items.find((it) => it.id === itemId);
+    if (!targetItem) return;
 
-    currentOrders = currentOrders.map(o => {
-      if (o.id === orderId) {
-        const updatedItems = o.items.map(it => {
-          if (it.id === itemId) {
-            return { ...it, status: it.status === "done" ? "preparing" : "done" };
-          }
-          return it;
-        });
-
-        const allItemsDone = updatedItems.every(it => it.status === "done");
-        return {
-          ...o,
-          items: updatedItems,
-          status: allItemsDone ? "done" : "preparing"
-        };
-      }
-      return o;
-    });
-
-    setOrders(currentOrders);
-    setOrdersState(currentOrders);
-
-    const targetOrder = currentOrders.find(o => o.id === orderId);
-    if (targetOrder && targetOrder.status === "done") {
-      trigger2SecondHistoryShift(targetOrder);
-    }
+    const nextStatus = targetItem.status === "done" ? "preparing" : "done";
+    await OrderRepository.updateItemStatus(orderId, itemId, nextStatus);
+    await loadKitchenOrders();
   };
 
-  const handleMarkEntireOrderDone = (orderObj) => {
+  const handleMarkEntireOrderDone = async (orderObj) => {
     if (isReadOnly) return;
     try {
       confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
     } catch(e) {}
 
-    let currentOrders = [...orders];
-    currentOrders = currentOrders.map(o => {
-      if (o.id === orderObj.id) {
-        return {
-          ...o,
-          status: "done",
-          items: o.items.map(it => ({ ...it, status: "done" }))
-        };
-      }
-      return o;
-    });
-
-    setOrders(currentOrders);
-    setOrdersState(currentOrders);
-
-    const updatedTarget = currentOrders.find(o => o.id === orderObj.id);
-    trigger2SecondHistoryShift(updatedTarget);
-  };
-
-  const trigger2SecondHistoryShift = (completedOrder) => {
-    setAnimatingDoneOrders(prev => ({ ...prev, [completedOrder.id]: true }));
-
-    setTimeout(() => {
-      let latestOrders = getOrders();
-      let latestHistory = getHistoryOrders();
-
-      const remainingOrders = latestOrders.filter(o => o.id !== completedOrder.id);
-      const shiftedOrder = { ...completedOrder, completedAt: Date.now() };
-
-      latestHistory.unshift(shiftedOrder);
-
-      setOrders(remainingOrders);
-      setOrdersState(remainingOrders);
-      setHistoryOrders(latestHistory);
-      setHistoryState(latestHistory);
-
-      setAnimatingDoneOrders(prev => {
-        const copy = { ...prev };
-        delete copy[completedOrder.id];
-        return copy;
-      });
-    }, 2000);
+    await OrderRepository.markEntireOrderDone(orderObj.id);
+    await loadKitchenOrders();
   };
 
   const sortedLiveOrders = [...orders].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));

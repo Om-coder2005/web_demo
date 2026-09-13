@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "../../components/Navbar.js";
 import OrderModal from "../../components/OrderModal.js";
 import { getCurrentUser } from "../../lib/storage.js";
+import { TableRepository, OrderRepository, MenuRepository } from "../../lib/offline/repositories.js";
 import { canManageFloor } from "../../lib/permissions.js";
 import { MachineOfflineAlert, ReadOnlyAlert, useMachineConnectivity, useMachineHeartbeat } from "../../components/MachineConnectivity.js";
 import { Plus, Receipt, Settings } from "lucide-react";
@@ -24,17 +25,11 @@ export default function TablesPage() {
   const isReadOnly = !canManageFloor(user?.role) || !machineStatus.online;
 
   async function load() {
-    const [tablesRes, ordersRes, menuRes] = await Promise.all([
-      fetch("/api/tables", { cache: "no-store" }),
-      fetch("/api/orders", { cache: "no-store" }),
-      fetch("/api/menu", { cache: "no-store" }),
+    const [tablesData, ordersData, menuData] = await Promise.all([
+      TableRepository.getTables(outlet?.hotelId),
+      OrderRepository.getActiveOrders(outlet?.hotelId),
+      MenuRepository.getMenu(outlet?.hotelId),
     ]);
-    const tablesData = await tablesRes.json();
-    const ordersData = await ordersRes.json();
-    const menuData = await menuRes.json();
-    if (!tablesRes.ok) throw new Error(tablesData.error || "Could not load tables.");
-    if (!ordersRes.ok) throw new Error(ordersData.error || "Could not load orders.");
-    if (!menuRes.ok) throw new Error(menuData.error || "Could not load menu.");
     setOutlet(tablesData.outlet);
     setTables(tablesData.tables);
     setOrders(ordersData.orders);
@@ -44,6 +39,16 @@ export default function TablesPage() {
   useEffect(() => {
     setUser(getCurrentUser());
     load().catch((err) => setError(err.message));
+
+    const handleSyncChange = () => load().catch(() => null);
+    if (typeof window !== "undefined") {
+      window.addEventListener("pos_sync_status_change", handleSyncChange);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("pos_sync_status_change", handleSyncChange);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -64,11 +69,19 @@ export default function TablesPage() {
   };
 
   const handleSaveOrder = async ({ tableNumber, items, notes }) => {
-    const res = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tableNumber, items, notes }) });
-    const data = await res.json();
-    if (!res.ok) return setError(data.error || "Could not create order.");
-    setSelectedTable(null);
-    await load();
+    try {
+      await OrderRepository.createOrAppendKOT({
+        tableNumber,
+        items,
+        notes,
+        hotelId: outlet?.id,
+        waiterName: user?.name || "Waiter",
+      });
+      setSelectedTable(null);
+      await load();
+    } catch (err) {
+      setError(err.message || "Could not save order.");
+    }
   };
 
   const handleMarkBilled = async () => {

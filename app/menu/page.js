@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar.js";
-import { getMenu, setMenu, getCurrentUser } from "../../lib/storage.js";
+import { getCurrentUser } from "../../lib/storage.js";
+import { MenuRepository } from "../../lib/offline/repositories.js";
 import { BookOpen, Plus, Search } from "lucide-react";
 import { ReadOnlyAlert } from "../../components/MachineConnectivity.js";
 
@@ -14,19 +15,16 @@ export default function MenuPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const isReadOnly = ["hotel_owner", "franchise_owner"].includes(user?.role);
 
-  const [newItem, setNewItem] = useState({
-    name: "",
-    category: "Bread & Toast",
-    price: "",
-    description: "Pure Veg • Freshly Prepared",
-    prepTime: "10 mins"
-  });
+  async function loadMenuData() {
+    const res = await MenuRepository.getMenu();
+    setMenuState(res.items || []);
+  }
 
   useEffect(() => {
     setUser(getCurrentUser());
-    setMenuState(getMenu());
+    loadMenuData();
 
-    const handleUpdate = () => setMenuState(getMenu());
+    const handleUpdate = () => loadMenuData();
     window.addEventListener("pos_data_update", handleUpdate);
     return () => window.removeEventListener("pos_data_update", handleUpdate);
   }, []);

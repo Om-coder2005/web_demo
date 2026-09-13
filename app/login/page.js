@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   const finish = (data) => { setCurrentUser({ ...data.user, hotelId: data.user.outletId, hotelName: data.user.outletName }); router.replace(data.redirect); router.refresh(); };
   const post = async (url, body) => { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); const data = await r.json(); if (!r.ok) throw new Error(data.error || "Sign-in failed."); return data; };
-  const sendOtp = async (e) => { e.preventDefault(); setBusy(true); setError(""); try { await post("/api/auth/send-otp", { email }); setOtpSent(true); setNotice("A six-digit verification code was sent to your approved email."); } catch (e) { setError(e.message); } finally { setBusy(false); } };
+  const sendOtp = async (e) => { e.preventDefault(); setBusy(true); setError(""); try { const res = await post("/api/auth/send-otp", { email }); setOtpSent(true); setNotice(res.devOtp ? `A six-digit verification code was sent. (Dev Code: ${res.devOtp})` : "A six-digit verification code was sent to your approved email."); } catch (e) { setError(e.message); } finally { setBusy(false); } };
   const verifyOtp = async (e) => { e.preventDefault(); setBusy(true); setError(""); try { finish(await post("/api/auth/verify-otp", { email, otp })); } catch (e) { setError(e.message); } finally { setBusy(false); } };
   const loginMachine = async (e) => { e.preventDefault(); setBusy(true); setError(""); try { finish(await post("/api/auth/machine-login", { email, password })); } catch (e) { setError(e.message); } finally { setBusy(false); } };
 

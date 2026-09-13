@@ -62,15 +62,100 @@ export async function POST(request) {
   if (orderItems.length !== items.length) return NextResponse.json({ error: "Order contains invalid menu items." }, { status: 400 });
 
   const totalAmount = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const clientOrderKey = String(body.clientOrderKey || "").trim();
+  const customOrderId = String(body.orderId || "").trim();
+
+  // Idempotency check: Return existing order if clientOrderKey or customOrderId already committed
+  let existingOrder = null;
+  if (clientOrderKey) {
+    existingOrder = await prisma.order.findFirst({
+      where: { outletId: outlet.id, notes: { contains: clientOrderKey } },
+      include: { items: true },
+    });
+  }
+  if (!existingOrder && customOrderId) {
+    existingOrder = await prisma.order.findUnique({
+      where: { id: customOrderId },
+      include: { items: true },
+    });
+  }
+
+  // Find active order on table if not matched by ID/Key
+  if (!existingOrder) {
+    existingOrder = await prisma.order.findFirst({
+      where: { outletId: outlet.id, tableNumber: Number(body.tableNumber), status: { in: ["preparing", "done"] } },
+      include: { items: true },
+    });
+  }
+
+  if (existingOrder) {
+    const existingItemIds = new Set(existingOrder.items.map((it) => it.id));
+    const itemsToInsert = items.map((item) => {
+      const menuItem = menuById.get(item.menuItemId || item.id);
+      const quantity = Number(item.quantity);
+      const itemId = String(item.id || "").trim();
+      if (!menuItem || !Number.isInteger(quantity) || quantity < 1 || (itemId && existingItemIds.has(itemId))) {
+        return null;
+      }
+      return {
+        id: itemId || undefined,
+        menuItemId: menuItem.id,
+        name: menuItem.name,
+        category: menuItem.category,
+        price: menuItem.price,
+        quantity,
+        status: "preparing",
+      };
+    }).filter(Boolean);
+
+    if (itemsToInsert.length > 0) {
+      const addedAmount = itemsToInsert.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const updated = await prisma.$transaction(async (tx) => {
+        await tx.orderItem.createMany({
+          data: itemsToInsert.map((it) => ({
+            id: it.id,
+            orderId: existingOrder.id,
+            menuItemId: it.menuItemId,
+            name: it.name,
+            category: it.category,
+            price: it.price,
+            quantity: it.quantity,
+            status: it.status,
+          })),
+        });
+        return tx.order.update({
+          where: { id: existingOrder.id },
+          data: { totalAmount: existingOrder.totalAmount + addedAmount, status: "preparing" },
+          include: { items: true },
+        });
+      });
+      emitOutletEvent(outlet.id, "orders:update", { orderId: updated.id });
+      return NextResponse.json({ order: shapeOrder(updated) }, { status: 200 });
+    }
+
+    return NextResponse.json({ order: shapeOrder(existingOrder) }, { status: 200 });
+  }
+
   const order = await prisma.$transaction(async (tx) => {
     const created = await tx.order.create({
       data: {
+        id: customOrderId || undefined,
         outletId: outlet.id,
         tableNumber: Number(body.tableNumber),
         waiterName: session.name || "Waiter",
-        notes: String(body.notes || "").trim(),
+        notes: clientOrderKey ? `[KEY:${clientOrderKey}] ${String(body.notes || "").trim()}` : String(body.notes || "").trim(),
         totalAmount,
-        items: { create: orderItems },
+        items: {
+          create: orderItems.map((it, idx) => ({
+            id: String(items[idx]?.id || "").trim() || undefined,
+            menuItemId: it.menuItemId,
+            name: it.name,
+            category: it.category,
+            price: it.price,
+            quantity: it.quantity,
+            status: it.status,
+          })),
+        },
       },
       include: { items: true },
     });

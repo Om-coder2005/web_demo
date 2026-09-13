@@ -61,6 +61,7 @@ export async function POST(request) {
       message: `OTP sent to ${normalizedEmail}. Valid for 10 minutes.`,
       role: user.role,
       name: user.name,
+      ...(process.env.NODE_ENV === "development" ? { devOtp: otp } : {}),
     });
   } catch (error) {
     console.error("[send-otp] Error:", error);

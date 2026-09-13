@@ -9,6 +9,8 @@
     "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@powersync/react": "^2.0.1",
+    "@powersync/web": "^2.3.1",
     "@prisma/client": "6.19.1",
     "bcryptjs": "^3.0.3",
     "canvas-confetti": "^1.9.4",
