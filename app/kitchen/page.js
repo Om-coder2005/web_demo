@@ -75,16 +75,25 @@ export default function KitchenPage() {
     };
   }, []);
 
-  const handleToggleItem = async (orderId, itemId) => {
-    if (isReadOnly) return;
-    const targetOrder = orders.find((o) => o.id === orderId);
-    const targetItem = targetOrder?.items.find((it) => it.id === itemId);
-    if (!targetItem) return;
+  const handleMarkItemDone = async (orderId, itemId) => {
+  if (isReadOnly) return;
+  try {
+    const res = await fetch(`/api/orders`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, action: "item-status", itemId, status: "done" })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      console.error("Failed to mark item done:", err);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  await loadKitchenOrders();
+};
 
-    const nextStatus = targetItem.status === "done" ? "preparing" : "done";
-    await OrderRepository.updateItemStatus(orderId, itemId, nextStatus);
-    await loadKitchenOrders();
-  };
+
 
   const handleMarkEntireOrderDone = async (orderObj) => {
     if (isReadOnly) return;

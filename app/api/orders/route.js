@@ -18,17 +18,23 @@ function shapeOrder(order) {
 export async function GET(request) {
   const session = getSessionFromRequest(request);
   const url = new URL(request.url);
-  const outlet = await resolveOutletForSession(session, url.searchParams.get("hotelId"));
-  if (!outlet) return NextResponse.json({ error: "Hotel access required." }, { status: 403 });
+  const outlet = await resolveOutletForSession(session, url.searchParams.get('hotelId'));
+  if (!outlet) return NextResponse.json({ error: 'Hotel access required.' }, { status: 403 });
 
-  const history = url.searchParams.get("history") === "true";
+  const page = Number(url.searchParams.get('page') || '1');
+  const limit = Number(url.searchParams.get('limit') || '10');
+  const skip = (page - 1) * limit;
+  const statusParam = url.searchParams.get('status');
+  const statusList = statusParam ? statusParam.split(',') : ['billed', 'done'];
+
   const orders = await prisma.order.findMany({
-    where: { outletId: outlet.id, status: history ? { in: ["done", "billed"] } : { in: ["preparing", "done"] } },
+    where: { outletId: outlet.id, status: { in: statusList } },
     include: { items: true },
-    orderBy: { createdAt: history ? "desc" : "asc" },
-    take: history ? 100 : undefined,
+    orderBy: { createdAt: 'desc' },
+    skip,
+    take: limit,
   });
-  return NextResponse.json({ outlet, orders: orders.map(shapeOrder) });
+  return NextResponse.json({ outlet, orders: orders.map(shapeOrder), page, limit });
 }
 
 export async function POST(request) {
@@ -80,13 +86,16 @@ export async function POST(request) {
     });
   }
 
-  // Find active order on table if not matched by ID/Key
-  if (!existingOrder) {
-    existingOrder = await prisma.order.findFirst({
-      where: { outletId: outlet.id, tableNumber: Number(body.tableNumber), status: { in: ["preparing", "done"] } },
-      include: { items: true },
-    });
+// If no existing order found via clientOrderKey or customOrderId, check for active order on the same table to prevent duplicate KOT
+if (!existingOrder) {
+  const activeOrder = await prisma.order.findFirst({
+    where: { outletId: outlet.id, tableNumber: Number(body.tableNumber), status: { in: ["preparing", "done"] } },
+    include: { items: true },
+  });
+  if (activeOrder) {
+    return NextResponse.json({ error: "An active order already exists for this table." }, { status: 409 });
   }
+}
 
   if (existingOrder) {
     const existingItemIds = new Set(existingOrder.items.map((it) => it.id));

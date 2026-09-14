@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+// Updated imports
+import { useState, useEffect } from "react";
+// State for dispatch flag
+
+
 import { X, Plus, Minus, Trash2, Send, Clock, ChefHat, Check, Search, ShoppingBag, BookOpen } from "lucide-react";
 
 export default function OrderModal({ table, order, menu, onClose, onSaveOrder, onMarkBilled, readOnly = false }) {
@@ -11,7 +15,10 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileTab, setMobileTab] = useState("menu"); // "menu" | "cart"
-  const [hasDispatchedSinceLastChange, setHasDispatchedSinceLastChange] = useState(false);
+  useEffect(() => {
+  // Reset dispatch flag when a new table is loaded or modal is opened
+  setHasDispatchedSinceLastChange(false);
+}, [table.number]);
 
   const categories = ["All", ...Array.from(new Set(menu.map(m => m.category)))];
 
@@ -158,7 +165,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
           </div>
 
           <button
-            onClick={onClose}
+            onClick={() => { setHasDispatchedSinceLastChange(false); onClose(); }}
             aria-label="Close Order Modal"
             style={{
               background: "#ffffff",
@@ -426,10 +433,11 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
                    disabled={readOnly || hasDispatchedSinceLastChange || currentItems.length === 0}
                   className="khandoli-btn-yellow"
                   style={{
-                    opacity: currentItems.length === 0 ? 0.4 : 1,
-                    fontSize: "0.85rem",
-                    padding: "0.7rem 1rem"
-                  }}
+                      opacity: currentItems.length === 0 ? 0.4 : 1,
+                      cursor: (readOnly || hasDispatchedSinceLastChange || currentItems.length === 0) ? 'not-allowed' : 'pointer',
+                      fontSize: "0.85rem",
+                      padding: "0.7rem 1rem"
+                    }}
                 >
                   <Send style={{ width: "16px", height: "16px" }} />
                   <span>Send to Kitchen</span>

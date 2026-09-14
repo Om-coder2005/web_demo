@@ -89,12 +89,12 @@ export default function Navbar() {
       icon: Settings,
       roles: ["hotel_owner"]
     },
-    {
-      href: "/dashboard",
-      label: user.role === "franchise_owner" ? "Franchise Analytics" : "Dashboard",
-      icon: LayoutDashboard,
-      roles: ["hotel_owner", "franchise_owner"]
-    },
+      {
+        href: "/dashboard/bills",
+        label: "Bills",
+        icon: BookOpen,
+        roles: ["hotel_owner","franchise_owner"]
+      },
     {
       href: "/admin",
       label: "Account Control",

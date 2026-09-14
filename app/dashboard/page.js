@@ -12,6 +12,7 @@ import {
   TrendingUp,
   ArrowRight,
 } from "lucide-react";
+import BillsList from "../../components/BillsList.js";
 
 function formatMoney(value) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value || 0);
@@ -105,6 +106,7 @@ export default function DashboardPage() {
             <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No orders recorded yet today.</p>
           )}
         </div>
+        <BillsList />
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server";
+import 'dotenv/config';
+import dotenv from "dotenv";
+dotenv.config();
 import { prisma } from "../../../../lib/db.js";
 import { sendOTPEmail } from "../../../../lib/mailer.js";
 import crypto from "crypto";
@@ -8,9 +10,17 @@ function generateOTP() {
   return crypto.randomInt(100000, 1000000).toString();
 }
 
+import { NextResponse } from "next/server";
+
 export async function POST(request) {
   try {
-    const { email } = await request.json();
+    let payload;
+    try {
+      payload = await request.json();
+    } catch (parseError) {
+      return NextResponse.json({ error: "Invalid JSON payload." }, { status: 400 });
+    }
+    const { email } = payload;
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Valid email is required." }, { status: 400 });
