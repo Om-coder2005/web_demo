@@ -5,7 +5,8 @@ import KOTItemSummary from "../../components/KOTItemSummary.js";
 import Navbar from "../../components/Navbar.js";
 import { getCurrentUser } from "../../lib/storage.js";
 import { OrderRepository } from "../../lib/offline/repositories.js";
-import { ChefHat, CheckCircle, Flame, History, CheckSquare, Square } from "lucide-react";
+import { ChefHat, CheckCircle, Flame, History, CheckSquare, Square, Minus, AlertCircle } from "lucide-react";
+import { io } from "socket.io-client";
 import confetti from "canvas-confetti";
 import { canManageKitchen } from "../../lib/permissions.js";
 import { MachineOfflineAlert, ReadOnlyAlert, useMachineConnectivity } from "../../components/MachineConnectivity.js";
@@ -25,6 +26,7 @@ export default function KitchenPage() {
     const completed = (res.orders || []).filter((o) => o.status === "done");
     setOrdersState(active);
     setHistoryState(completed);
+    return res.outlet;
   }
 
   useEffect(() => {
@@ -38,6 +40,38 @@ export default function KitchenPage() {
     return () => {
       window.removeEventListener("pos_data_update", handleUpdate);
       window.removeEventListener("pos_sync_status_change", handleUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    let socket;
+    const setupSocket = async () => {
+      const outlet = await loadKitchenOrders();
+      if (!outlet?.hotelId) return;
+
+      socket = io(window.location.origin, {
+        transports: ["websocket"],
+      });
+
+      socket.emit("joinOutlet", outlet.hotelId);
+
+      const handleOutletEvent = (data) => {
+        if (data.type && !["connected", "heartbeat"].includes(data.type)) {
+          loadKitchenOrders();
+        }
+      };
+
+      socket.on("outletEvent", handleOutletEvent);
+
+      return () => {
+        socket.off("outletEvent", handleOutletEvent);
+        socket.disconnect();
+      };
+    };
+
+    const cleanupPromise = setupSocket();
+    return () => {
+      cleanupPromise.then(cleanup => cleanup && cleanup());
     };
   }, []);
 
@@ -247,10 +281,14 @@ export default function KitchenPage() {
                                 }}
                               >
                                 <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                                  {itemDone ? (
-                                    <CheckSquare style={{ width: "18px", height: "18px", color: "#10b981" }} />
+                                  {item.quantity === 1 ? (
+                                    itemDone ? (
+                                      <CheckSquare style={{ width: "18px", height: "18px", color: "#10b981" }} />
+                                    ) : (
+                                      <Square style={{ width: "18px", height: "18px", color: "#b45309" }} />
+                                    )
                                   ) : (
-                                    <Square style={{ width: "18px", height: "18px", color: "#b45309" }} />
+                                    <Minus style={{ width: "18px", height: "18px", color: itemDone ? "#10b981" : "#b45309" }} />
                                   )}
                                   <span style={{
                                     fontSize: "0.85rem",

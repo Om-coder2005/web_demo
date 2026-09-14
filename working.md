@@ -10,7 +10,7 @@ Welcome to the **NextBills POS** codebase documentation. This document is writte
 
 ### Principles:
 1. **Zero Mock/False Data**: Every view in the application strictly reflects live PostgreSQL database records. When a new hotel is onboarded, it starts completely clean with zero items, zero tables, zero staff, and zero orders until configured by the Hotel Owner.
-2. **Real-Time Synchronization**: Built with an SSE (Server-Sent Events) bus (`/api/realtime`) emitting instant event payloads to floor waiters, kitchen displays, and terminal machines with zero page refreshes.
+2. **Real-Time Synchronization**: Built with a Socket.io event bus enabling instant bidirectional communication between server and clients for floor waiters, kitchen displays, and terminal machines with zero page refreshes.
 3. **Role-Based Access Control (RBAC)**: Strict server-enforced boundary across 6 explicit roles: `admin`, `franchise_owner`, `hotel_owner`, `machine`, `waiter`, and `kitchen`.
 4. **Auditability & POS Integrity**: Every bill generated receives a sequential bill number per hotel. Any bill adjustments produce an immutable `BillAuditLog` record containing a diff of item changes, user id, and reason.
 
@@ -18,12 +18,12 @@ Welcome to the **NextBills POS** codebase documentation. This document is writte
 
 ## 2. Technical Stack
 
-- **Framework**: Next.js 16 (App Router with Turbopack)
-- **Database & ORM**: PostgreSQL via Prisma 6 ORM
-- **Real-Time Bus**: Server-Sent Events (SSE) with `EventEmitter` broadcast matching hotel IDs
-- **Authentication**: HTTP-only JWT Cookie Authentication (`nextbills_token`)
-- **Styling**: Modern Vanilla CSS with HSL design tokens, responsive floor grid, and glassmorphism styling
-- **Hardware Integration**: Dedicated POS Terminal Machine connectivity via secure tokens and heartbeat monitoring
+- **Framework: Next.js 1. Next.js 16 (App Router with Turbopack)  
+Database & ORM: PostgreSQL via Prisma 6 ORM  
+Real-Time Bus: Socket.io with bidirectional event broadcasting matching hotel IDs  
+Authentication: HTTP-only JWT Cookie Authentication (`nextbills_token`)  
+Styling: Modern Vanilla CSS with HSL design tokens, responsive floor grid, and glassmorphism styling  
+Hardware Integration: Dedicated POS Terminal Machine connectivity via secure tokens and heartbeat monitoring
 
 ---
 
@@ -54,9 +54,9 @@ erDiagram
 
 ---
 
-## 4. Real-Time WebSocket / SSE Architecture
+## 4. Real-Time Socket.io Architecture
 
-NextBills utilizes a lightweight SSE event bus located in `lib/realtimeBus.js` and streamed via `/api/realtime?hotelId={ID}`.
+NextBills utilizes a Socket.io event bus located in `lib/realtimeBus.js` with server-side broadcasting via global emitter and client-side connections.
 
 ### Streamed Event Types:
 - `orders:create`: Dispatched when a waiter or POS machine sends a new KOT ticket to the kitchen.
@@ -65,6 +65,13 @@ NextBills utilizes a lightweight SSE event bus located in `lib/realtimeBus.js` a
 - `tables:update` / `tables:reset`: Dispatched when the hotel owner modifies or reconfigures the floor grid.
 - `outlet:settings`: Dispatched when custom KOT/Bill notes or outlet configurations update.
 - `machine:heartbeat`: Dispatched every 10s by active POS terminal machines to maintain online status.
+
+### Connection Mechanism:
+1. Client establishes Socket.io connection to server
+2. Upon outlet identification, client joins outlet-specific room via `joinOutlet` event
+3. Server broadcasts events to all clients in the relevant outlet room
+4. Automatic reconnection handling for network interruptions
+5. Heartbeat mechanism to detect disconnections
 
 ---
 
@@ -116,7 +123,7 @@ npm install
 # Run database migrations
 npx prisma db push
 
-# Start dev server with real-time SSE support
+# Start dev server with Socket.io real-time support
 npm run dev
 ```
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import Link from "next/link";
 import Navbar from "../../components/Navbar.js";
 import OrderModal from "../../components/OrderModal.js";
@@ -53,17 +54,30 @@ export default function TablesPage() {
 
   useEffect(() => {
     if (!outlet?.hotelId) return;
-    const events = new EventSource(`/api/realtime?hotelId=${encodeURIComponent(outlet.hotelId)}`);
-    events.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type && !["connected", "heartbeat"].includes(data.type)) load().catch(() => null);
+
+    const socket = io(window.location.origin, {
+      transports: ["websocket"],
+    });
+
+    socket.emit("joinOutlet", outlet.hotelId);
+
+    const handleOutletEvent = (data) => {
+      if (data.type && !["connected", "heartbeat"].includes(data.type)) {
+        load().catch(() => null);
+      }
     };
-    return () => events.close();
+
+    socket.on("outletEvent", handleOutletEvent);
+
+    return () => {
+      socket.off("outletEvent", handleOutletEvent);
+      socket.disconnect();
+    };
   }, [outlet?.hotelId]);
 
   const handleTableClick = (table) => {
     if (isReadOnly) return;
-    const order = orders.find((row) => row.tableNumber === table.number && row.status !== "billed");
+    const order = orders.find((row) => row.tableNumber === table.number);
     setSelectedTable(table);
     setActiveModalOrder(order || null);
   };
@@ -127,7 +141,7 @@ export default function TablesPage() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 170px), 1fr))", gap: "1rem" }}>
             {filteredTables.map((table) => {
-              const order = orders.find((row) => row.tableNumber === table.number && row.status !== "billed");
+              const order = orders.find((row) => row.tableNumber === table.number);
               const itemCount = order ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
               return (
                 <button key={table.id} onClick={() => handleTableClick(table)} className="glass-panel" style={{ textAlign: "left", padding: "1rem", cursor: isReadOnly ? "not-allowed" : "pointer", background: table.status === "Occupied" ? "rgba(252,197,0,0.12)" : "#fff", border: table.status === "Occupied" ? "2px solid var(--brand-yellow)" : "1px solid var(--border-color)" }}>

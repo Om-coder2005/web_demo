@@ -11,11 +11,13 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileTab, setMobileTab] = useState("menu"); // "menu" | "cart"
+  const [hasDispatchedSinceLastChange, setHasDispatchedSinceLastChange] = useState(false);
 
   const categories = ["All", ...Array.from(new Set(menu.map(m => m.category)))];
 
   const handleAddItem = (menuItem) => {
     if (readOnly) return;
+    setHasDispatchedSinceLastChange(false);
     setCurrentItems(prev => {
       const existingIndex = prev.findIndex(item => item.id === menuItem.id);
       if (existingIndex > -1) {
@@ -40,6 +42,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
 
   const handleQuantityChange = (itemId, delta) => {
     if (readOnly) return;
+    setHasDispatchedSinceLastChange(false);
     setCurrentItems(prev => {
       return prev
         .map(item => {
@@ -58,14 +61,19 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
     return currentItems.reduce((acc, curr) => acc + curr.price * curr.quantity, 0).toFixed(2);
   };
 
-  const handleDispatchKOT = () => {
+  const handleDispatchKOT = async () => {
     if (readOnly) return;
     if (currentItems.length === 0) return;
-    onSaveOrder({
-      tableNumber: table.number,
-      items: currentItems,
-      notes: notes
-    });
+    setHasDispatchedSinceLastChange(true);
+    try {
+      onSaveOrder({
+        tableNumber: table.number,
+        items: currentItems,
+        notes: notes
+      });
+    } finally {
+      // Note: We don't reset the flag here - it stays true until items are modified
+    }
   };
 
   const isNonVegOrEgg = (item) => {
@@ -415,8 +423,7 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
               <div style={{ display: "grid", gridTemplateColumns: table.status !== "Available" ? "1fr 1fr" : "1fr", gap: "0.6rem" }}>
                 <button
                   onClick={handleDispatchKOT}
-                  disabled={readOnly}
-                  disabled={currentItems.length === 0}
+                   disabled={readOnly || hasDispatchedSinceLastChange || currentItems.length === 0}
                   className="khandoli-btn-yellow"
                   style={{
                     opacity: currentItems.length === 0 ? 0.4 : 1,
