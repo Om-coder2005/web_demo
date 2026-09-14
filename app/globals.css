@@ -331,3 +331,32 @@ html, body {
   background: #f1f5f9;
 }
 
+/* KOT Print Styles */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  
+  #kot-printable-area, #kot-printable-area * {
+    visibility: visible !important;
+  }
+  
+  #kot-printable-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 80mm !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  .kot-no-print, .kot-modal-backdrop {
+    background: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+}
+

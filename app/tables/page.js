@@ -100,9 +100,25 @@ export default function TablesPage() {
 
   const handleMarkBilled = async () => {
     if (!activeModalOrder) return;
-    const res = await fetch("/api/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId: activeModalOrder.id, action: "bill" }) });
-    const data = await res.json();
-    if (!res.ok) return setError(data.error || "Could not bill order.");
+
+    if (user?.role === "machine" && !navigator.onLine) {
+      await OrderRepository.markOrderBilled(activeModalOrder.id, activeModalOrder.tableNumber);
+      setSelectedTable(null);
+      await load();
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId: activeModalOrder.id, action: "bill" }) });
+      const data = await res.json();
+      if (!res.ok) return setError(data.error || "Could not bill order.");
+    } catch (e) {
+      if (user?.role === "machine") {
+        await OrderRepository.markOrderBilled(activeModalOrder.id, activeModalOrder.tableNumber);
+      } else {
+        return setError("Network offline. Billing requires an active connection for non-machine roles.");
+      }
+    }
     setSelectedTable(null);
     await load();
   };

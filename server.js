@@ -1,5 +1,4 @@
 const { createServer } = require("http");
-const { parse } = require("url");
 const next = require("next");
 const { Server } = require("socket.io");
 
@@ -12,17 +11,21 @@ const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
   const httpServer = createServer((req, res) => {
-    const parsedUrl = parse(req.url, true);
-    handler(req, res, parsedUrl);
+    handler(req, res);
   });
 
   // We'll store the outletId to socket mapping for broadcasting
-  const outletSocketMap = new Map(); // outletId -> Set of socket ids
+  const cookie = require("cookie");
+  const jwt = require("jsonwebtoken");
+  const JWT_SECRET = process.env.NEXTAUTH_SECRET || "development-only-khandoli-secret";
+
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || (dev ? "*" : `http://${hostname}:${port}`);
 
   const io = new Server(httpServer, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
+      origin: allowedOrigin,
+      methods: ["GET", "POST"],
+      credentials: true
     }
   });
 
@@ -40,17 +43,48 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
+    // Extract & verify khandoli_session cookie
+    let session = null;
+    try {
+      const rawCookies = socket.handshake.headers.cookie;
+      if (rawCookies) {
+        const parsedCookies = cookie.parse(rawCookies);
+        const token = parsedCookies.khandoli_session;
+        if (token) {
+          session = jwt.verify(token, JWT_SECRET);
+        }
+      }
+    } catch (err) {
+      session = null;
+    }
+
+    // Authenticated socket session metadata
+    socket.session = session;
+
     // When a client joins an outlet room
-    socket.on("joinOutlet", (outletId) => {
-      if (!outletId) return;
-      console.log(`Socket ${socket.id} joined outlet ${outletId}`);
-      let sockets = outletSocketMap.get(outletId);
+    socket.on("joinOutlet", (requestedOutletId) => {
+      if (!requestedOutletId) return;
+
+      // Verify tenant authorization against authenticated session if available
+      if (socket.session) {
+        const { role, outletId: sessionOutletId } = socket.session;
+        // Staff roles (hotel_owner, waiter, kitchen, machine) can only join their assigned outlet
+        if (["hotel_owner", "waiter", "kitchen", "machine"].includes(role)) {
+          if (sessionOutletId && sessionOutletId !== requestedOutletId) {
+            console.warn(`[Socket.io Security] Blocked socket ${socket.id} (user role: ${role}) from unauthorized outlet ${requestedOutletId}`);
+            return;
+          }
+        }
+      }
+
+      console.log(`Socket ${socket.id} joined outlet ${requestedOutletId}`);
+      let sockets = outletSocketMap.get(requestedOutletId);
       if (!sockets) {
         sockets = new Set();
-        outletSocketMap.set(outletId, sockets);
+        outletSocketMap.set(requestedOutletId, sockets);
       }
       sockets.add(socket.id);
-      socket.outletId = outletId; // store on socket for disconnect
+      socket.outletId = requestedOutletId; // store on socket for disconnect
     });
 
     // When a client leaves an outlet room (or disconnects)

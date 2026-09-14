@@ -86,16 +86,20 @@ export async function POST(request) {
     });
   }
 
-// If no existing order found via clientOrderKey or customOrderId, check for active order on the same table to prevent duplicate KOT
-if (!existingOrder) {
-  const activeOrder = await prisma.order.findFirst({
+  // Find active order on table
+  const activeOrderOnTable = await prisma.order.findFirst({
     where: { outletId: outlet.id, tableNumber: Number(body.tableNumber), status: { in: ["preparing", "done"] } },
     include: { items: true },
   });
-  if (activeOrder) {
-    return NextResponse.json({ error: "An active order already exists for this table." }, { status: 409 });
+
+  // APPEND Mode: If no specific key matched an existing order, but the table has an active order, append new line items to it
+  if (!existingOrder && activeOrderOnTable) {
+    // If request explicitly provided a customOrderId or clientOrderKey intended for a NEW order header, reject with 409
+    if (customOrderId || (clientOrderKey && !activeOrderOnTable.notes?.includes(clientOrderKey))) {
+      return NextResponse.json({ error: "An active order already exists for this table. New order headers cannot be created while table is occupied." }, { status: 409 });
+    }
+    existingOrder = activeOrderOnTable;
   }
-}
 
   if (existingOrder) {
     const existingItemIds = new Set(existingOrder.items.map((it) => it.id));
@@ -205,14 +209,17 @@ export async function PATCH(request) {
 
   if (body.action === "bill") {
     if (!canManageFloor(session?.role)) return NextResponse.json({ error: "Floor access required." }, { status: 403 });
-    const lastBill = await prisma.order.findFirst({ where: { outletId: outlet.id, billNumber: { not: null } }, orderBy: { billNumber: "desc" } });
-    const billNumber = (lastBill?.billNumber || 0) + 1;
+    if (order.status === "billed" && order.billNumber != null) {
+      return NextResponse.json({ order: shapeOrder(order) }, { status: 200 });
+    }
     const updated = await prisma.$transaction(async (tx) => {
-      const billed = await tx.order.update({ where: { id: order.id }, data: { status: "billed", billNumber, billedAt: new Date() }, include: { items: true } });
+      const lastBill = await tx.order.findFirst({ where: { outletId: outlet.id, billNumber: { not: null } }, orderBy: { billNumber: "desc" } });
+      const billNumber = (lastBill?.billNumber || 0) + 1;
+      const billed = await tx.order.update({ where: { id: order.id }, data: { status: "billed", billNumber, billedAt: order.billedAt || new Date() }, include: { items: true } });
       await tx.table.updateMany({ where: { outletId: outlet.id, number: order.tableNumber }, data: { status: "Available", currentOrderId: null } });
       return billed;
     });
-    emitOutletEvent(outlet.id, "orders:billed", { orderId: order.id, billNumber });
+    emitOutletEvent(outlet.id, "orders:billed", { orderId: order.id, billNumber: updated.billNumber });
     return NextResponse.json({ order: shapeOrder(updated) });
   }
 

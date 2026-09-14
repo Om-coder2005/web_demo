@@ -1,11 +1,8 @@
 "use client";
 
-// Updated imports
 import { useState, useEffect } from "react";
-// State for dispatch flag
-
-
-import { X, Plus, Minus, Trash2, Send, Clock, ChefHat, Check, Search, ShoppingBag, BookOpen } from "lucide-react";
+import KOTPrintModal from "./KOTPrintModal.js";
+import { X, Plus, Minus, Trash2, Send, Clock, ChefHat, Check, Search, ShoppingBag, BookOpen, Printer } from "lucide-react";
 
 export default function OrderModal({ table, order, menu, onClose, onSaveOrder, onMarkBilled, readOnly = false }) {
   const [currentItems, setCurrentItems] = useState(
@@ -15,10 +12,13 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileTab, setMobileTab] = useState("menu"); // "menu" | "cart"
+  const [hasDispatchedSinceLastChange, setHasDispatchedSinceLastChange] = useState(false);
+  const [showKOTPrintModal, setShowKOTPrintModal] = useState(false);
+
   useEffect(() => {
-  // Reset dispatch flag when a new table is loaded or modal is opened
-  setHasDispatchedSinceLastChange(false);
-}, [table.number]);
+    // Reset dispatch flag when a new table is loaded or modal is opened
+    setHasDispatchedSinceLastChange(false);
+  }, [table.number]);
 
   const categories = ["All", ...Array.from(new Set(menu.map(m => m.category)))];
 
@@ -69,17 +69,17 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
   };
 
   const handleDispatchKOT = async () => {
-    if (readOnly) return;
+    if (readOnly || hasDispatchedSinceLastChange) return;
     if (currentItems.length === 0) return;
     setHasDispatchedSinceLastChange(true);
     try {
-      onSaveOrder({
+      await onSaveOrder({
         tableNumber: table.number,
         items: currentItems,
         notes: notes
       });
-    } finally {
-      // Note: We don't reset the flag here - it stays true until items are modified
+    } catch (e) {
+      setHasDispatchedSinceLastChange(false);
     }
   };
 
@@ -430,14 +430,14 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
               <div style={{ display: "grid", gridTemplateColumns: table.status !== "Available" ? "1fr 1fr" : "1fr", gap: "0.6rem" }}>
                 <button
                   onClick={handleDispatchKOT}
-                   disabled={readOnly || hasDispatchedSinceLastChange || currentItems.length === 0}
+                  disabled={readOnly || hasDispatchedSinceLastChange || currentItems.length === 0}
                   className="khandoli-btn-yellow"
                   style={{
-                      opacity: currentItems.length === 0 ? 0.4 : 1,
-                      cursor: (readOnly || hasDispatchedSinceLastChange || currentItems.length === 0) ? 'not-allowed' : 'pointer',
-                      fontSize: "0.85rem",
-                      padding: "0.7rem 1rem"
-                    }}
+                    opacity: (readOnly || hasDispatchedSinceLastChange || currentItems.length === 0) ? 0.4 : 1,
+                    cursor: (readOnly || hasDispatchedSinceLastChange || currentItems.length === 0) ? "not-allowed" : "pointer",
+                    fontSize: "0.85rem",
+                    padding: "0.7rem 1rem"
+                  }}
                 >
                   <Send style={{ width: "16px", height: "16px" }} />
                   <span>Send to Kitchen</span>
@@ -461,6 +461,29 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
                   </button>
                 )}
               </div>
+
+              {currentItems.length > 0 && (
+                <button
+                  onClick={() => setShowKOTPrintModal(true)}
+                  style={{
+                    width: "100%",
+                    padding: "0.6rem",
+                    background: "#ffffff",
+                    border: "1px solid var(--border-color)",
+                    borderRadius: "8px",
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.4rem"
+                  }}
+                >
+                  <Printer style={{ width: "15px", height: "15px" }} />
+                  <span>Preview & Print KOT</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -657,13 +680,27 @@ export default function OrderModal({ table, order, menu, onClose, onSaveOrder, o
                   textTransform: "uppercase",
                   cursor: "pointer"
                 }}>
-                  View Cart →
+                  View Cart &rarr;
                 </button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {showKOTPrintModal && (
+        <KOTPrintModal
+          order={{
+            id: order?.id || "draft",
+            tableNumber: table.number,
+            items: currentItems,
+            notes: notes,
+            waiterName: order?.waiterName || "Staff",
+            createdAt: order?.createdAt || new Date().toISOString()
+          }}
+          onClose={() => setShowKOTPrintModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Navbar from "../../components/Navbar.js";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Building2,
   ShoppingBag,
@@ -11,6 +12,7 @@ import {
   UtensilsCrossed,
   TrendingUp,
   ArrowRight,
+  Store,
 } from "lucide-react";
 import BillsList from "../../components/BillsList.js";
 
@@ -18,24 +20,55 @@ function formatMoney(value) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value || 0);
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const hotelIdParam = searchParams.get("hotelId");
+
   const [user, setUser] = useState(null);
   const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [noOutletContext, setNoOutletContext] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
       setLoading(true);
+      setNoOutletContext(false);
       try {
-        const [meRes, analyticsRes] = await Promise.all([
-          fetch("/api/outlets/me", { cache: "no-store", credentials: "include" }),
-          fetch("/api/analytics/summary", { cache: "no-store", credentials: "include" }),
-        ]);
-        const meData = await meRes.json();
+        const sessionRes = await fetch("/api/auth/session", { cache: "no-store", credentials: "include" });
+        if (!sessionRes.ok) {
+          if (isMounted) setLoading(false);
+          return;
+        }
+        const sessionData = await sessionRes.json();
+        const currentUser = sessionData.user;
         if (!isMounted) return;
-        setUser(meData || null);
-        if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
+        setUser(currentUser);
+
+        if (!currentUser) {
+          setLoading(false);
+          return;
+        }
+
+        // If global admin with no explicit outlet context, skip fetching outlet analytics
+        if (currentUser.role === "admin" && !hotelIdParam) {
+          setNoOutletContext(true);
+          setLoading(false);
+          return;
+        }
+
+        const analyticsUrl = hotelIdParam
+          ? `/api/analytics/summary?hotelId=${encodeURIComponent(hotelIdParam)}`
+          : "/api/analytics/summary";
+
+        const analyticsRes = await fetch(analyticsUrl, { cache: "no-store", credentials: "include" });
+        if (!isMounted) return;
+
+        if (analyticsRes.status === 403) {
+          setNoOutletContext(true);
+        } else if (analyticsRes.ok) {
+          setAnalytics(await analyticsRes.json());
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -44,9 +77,40 @@ export default function DashboardPage() {
     };
     loadData();
     return () => { isMounted = false; };
-  }, []);
+  }, [hotelIdParam]);
+
+  if (!user && loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#fff" }}>
+        <p style={{ color: "var(--text-muted)" }}>Loading live dashboard data...</p>
+      </div>
+    );
+  }
 
   if (!user) return null;
+
+  if (noOutletContext || (user.role === "admin" && !hotelIdParam && !analytics)) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column" }}>
+        <Navbar />
+        <div className="mobile-bottom-space" style={{ padding: "1.25rem 1rem", flex: 1, maxWidth: "1300px", margin: "0 auto", width: "100%", display: "grid", placeItems: "center" }}>
+          <div className="glass-panel" style={{ padding: "2.5rem 2rem", maxWidth: "500px", width: "100%", textAlign: "center", background: "#ffffff" }}>
+            <div style={{ display: "inline-flex", padding: 14, borderRadius: "50%", background: "#fef3c7", color: "#b45309", marginBottom: "1rem" }}>
+              <Store size={32} />
+            </div>
+            <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.5rem" }}>Select an outlet to continue</h1>
+            <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "1.5rem" }}>
+              This dashboard requires an outlet context. Select an outlet from the Admin panel to view outlet-specific analytics and operations.
+            </p>
+            <Link href="/admin" className="khandoli-btn-yellow" style={{ display: "inline-flex", justifyContent: "center", textDecoration: "none", padding: "0.75rem 1.5rem", fontWeight: 800 }}>
+              Go to Admin Panel
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) return (
     <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#fff" }}>
       <p style={{ color: "var(--text-muted)" }}>Loading live dashboard data...</p>
@@ -111,3 +175,15 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#fff" }}>
+        <p style={{ color: "var(--text-muted)" }}>Loading live dashboard data...</p>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
+  );
+}

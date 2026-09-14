@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import KOTItemSummary from "../../components/KOTItemSummary.js";
+import KOTPrintModal from "../../components/KOTPrintModal.js";
 import Navbar from "../../components/Navbar.js";
 import { getCurrentUser } from "../../lib/storage.js";
 import { OrderRepository } from "../../lib/offline/repositories.js";
-import { ChefHat, CheckCircle, Flame, History, CheckSquare, Square, Minus, AlertCircle } from "lucide-react";
+import { ChefHat, CheckCircle, Flame, History, CheckSquare, Square, Minus, Printer } from "lucide-react";
 import { io } from "socket.io-client";
 import confetti from "canvas-confetti";
 import { canManageKitchen } from "../../lib/permissions.js";
@@ -17,6 +18,8 @@ export default function KitchenPage() {
   const [history, setHistoryState] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
   const [animatingDoneOrders, setAnimatingDoneOrders] = useState({});
+  const [selectedKOTForPrint, setSelectedKOTForPrint] = useState(null);
+  const [kitchenOutlet, setKitchenOutlet] = useState(null);
   const machineStatus = useMachineConnectivity(user);
   const isReadOnly = !canManageKitchen(user?.role) || !machineStatus.online;
 
@@ -26,6 +29,7 @@ export default function KitchenPage() {
     const completed = (res.orders || []).filter((o) => o.status === "done");
     setOrdersState(active);
     setHistoryState(completed);
+    if (res.outlet) setKitchenOutlet(res.outlet);
     return res.outlet;
   }
 
@@ -75,23 +79,36 @@ export default function KitchenPage() {
     };
   }, []);
 
-  const handleMarkItemDone = async (orderId, itemId) => {
-  if (isReadOnly) return;
-  try {
-    const res = await fetch(`/api/orders`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, action: "item-status", itemId, status: "done" })
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      console.error("Failed to mark item done:", err);
+  const handleMarkItemDone = async (orderId, itemId, currentStatus) => {
+    if (isReadOnly) return;
+    const newStatus = currentStatus === "done" ? "preparing" : "done";
+
+    if (user?.role === "machine" && !navigator.onLine) {
+      // Machine offline write path
+      await OrderRepository.updateItemStatus(orderId, itemId, newStatus);
+      await loadKitchenOrders();
+      return;
     }
-  } catch (e) {
-    console.error(e);
-  }
-  await loadKitchenOrders();
-};
+
+    try {
+      const res = await fetch(`/api/orders`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, action: "item-status", itemId, status: newStatus })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        console.error("Failed to mark item status:", err);
+      }
+    } catch (e) {
+      console.error(e);
+      // Fallback to offline repository write ONLY if authorized machine account
+      if (user?.role === "machine") {
+        await OrderRepository.updateItemStatus(orderId, itemId, newStatus);
+      }
+    }
+    await loadKitchenOrders();
+  };
 
 
 
@@ -276,7 +293,7 @@ export default function KitchenPage() {
                             return (
                               <div
                                 key={item.id}
-                                onClick={() => handleToggleItem(o.id, item.id)}
+                                onClick={() => handleMarkItemDone(o.id, item.id, item.status)}
                                 style={{
                                   background: itemDone ? "rgba(16, 185, 129, 0.15)" : "var(--bg-card-secondary)",
                                   border: itemDone ? "1px solid rgba(16, 185, 129, 0.35)" : "1px solid var(--border-color)",
@@ -325,22 +342,42 @@ export default function KitchenPage() {
                         </div>
                       </div>
 
-                      {/* Complete Entire KOT Button */}
-                      <button
-                        onClick={() => handleMarkEntireOrderDone(o)}
-                        disabled={isDone || isReadOnly}
-                        className={isDone ? "khandoli-btn-black" : "khandoli-btn-yellow"}
-                        style={{
-                          width: "100%",
-                          justifyContent: "center",
-                          fontSize: "0.85rem",
-                          opacity: isDone || isReadOnly ? 0.6 : 1,
-                          padding: "0.65rem"
-                        }}
-                      >
-                        <CheckCircle style={{ width: "16px", height: "16px" }} />
-                        <span>{isReadOnly ? "View Only" : isDone ? "Completed! Archiving..." : "Complete Entire KOT"}</span>
-                      </button>
+                      {/* KOT Action Buttons */}
+                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                        <button
+                          onClick={() => setSelectedKOTForPrint(o)}
+                          style={{
+                            padding: "0.65rem 0.85rem",
+                            background: "#ffffff",
+                            border: "1px solid var(--border-color)",
+                            borderRadius: "8px",
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.35rem"
+                          }}
+                        >
+                          <Printer style={{ width: "15px", height: "15px" }} />
+                          <span>Print KOT</span>
+                        </button>
+                        <button
+                          onClick={() => handleMarkEntireOrderDone(o)}
+                          disabled={isDone || isReadOnly}
+                          className={isDone ? "khandoli-btn-black" : "khandoli-btn-yellow"}
+                          style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            fontSize: "0.85rem",
+                            opacity: isDone || isReadOnly ? 0.6 : 1,
+                            padding: "0.65rem"
+                          }}
+                        >
+                          <CheckCircle style={{ width: "16px", height: "16px" }} />
+                          <span>{isReadOnly ? "View Only" : isDone ? "Completed!" : "Complete KOT"}</span>
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -359,17 +396,38 @@ export default function KitchenPage() {
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: "1rem" }}>
                 {history.map(h => (
-                  <div key={h.id} className="glass-panel" style={{ padding: "1.15rem", borderLeft: "4px solid #10b981", background: "#ffffff" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                      <span style={{ fontWeight: 900, color: "#0f172a", fontSize: "1rem" }}>Table #{h.tableNumber}</span>
-                      <span className="badge badge-done">Completed</span>
+                  <div key={h.id} className="glass-panel" style={{ padding: "1.15rem", borderLeft: "4px solid #10b981", background: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                        <span style={{ fontWeight: 900, color: "#0f172a", fontSize: "1rem" }}>Table #{h.tableNumber}</span>
+                        <span className="badge badge-done">Completed</span>
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "0.5rem" }}>
+                        KOT #{h.id} • Waiter: {h.waiterName} • {h.timestamp}
+                      </div>
+                      <div style={{ fontSize: "0.78rem", color: "#334155", marginBottom: "0.85rem" }}>
+                        {h.items?.map(it => `${it.name} (x${it.quantity})`).join(", ")}
+                      </div>
                     </div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "0.5rem" }}>
-                      KOT #{h.id} • Waiter: {h.waiterName} • {h.timestamp}
-                    </div>
-                    <div style={{ fontSize: "0.78rem", color: "#334155" }}>
-                      {h.items?.map(it => `${it.name} (x${it.quantity})`).join(", ")}
-                    </div>
+                    <button
+                      onClick={() => setSelectedKOTForPrint(h)}
+                      style={{
+                        padding: "0.55rem 0.85rem",
+                        background: "#ffffff",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "8px",
+                        fontSize: "0.78rem",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.35rem"
+                      }}
+                    >
+                      <Printer style={{ width: "14px", height: "14px" }} />
+                      <span>Print KOT</span>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -377,6 +435,14 @@ export default function KitchenPage() {
           </div>
         )}
       </div>
+
+      {selectedKOTForPrint && (
+        <KOTPrintModal
+          order={selectedKOTForPrint}
+          outlet={kitchenOutlet}
+          onClose={() => setSelectedKOTForPrint(null)}
+        />
+      )}
     </div>
   );
 }

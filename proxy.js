@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const access = {
-  "/dashboard": ["hotel_owner", "franchise_owner"],
+  "/dashboard": ["admin", "hotel_owner", "franchise_owner"],
   "/tables": ["machine", "waiter", "hotel_owner", "franchise_owner"],
   "/kitchen": ["machine", "kitchen", "hotel_owner", "franchise_owner"],
   "/menu": ["hotel_owner", "franchise_owner"],
@@ -35,3 +35,6 @@ export async function proxy(request) {
 }
 
 export const config = { matcher: ["/dashboard", "/tables", "/kitchen", "/menu", "/settings", "/admin"] };
+
+export { proxy as middleware };
+export default proxy;

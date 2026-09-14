@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function BillsList() {
+function BillsListContent() {
+  const searchParams = useSearchParams();
+  const hotelIdParam = searchParams.get("hotelId");
+
   const [bills, setBills] = useState([]);
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -11,7 +15,10 @@ export default function BillsList() {
   const fetchBills = async (p) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/orders?status=billed,completed&page=${p}&limit=${limit}`);
+      const url = hotelIdParam
+        ? `/api/orders?status=billed,completed&page=${p}&limit=${limit}&hotelId=${encodeURIComponent(hotelIdParam)}`
+        : `/api/orders?status=billed,completed&page=${p}&limit=${limit}`;
+      const res = await fetch(url);
       const data = await res.json();
       setBills(data.orders || []);
     } catch (e) {
@@ -23,7 +30,7 @@ export default function BillsList() {
 
   useEffect(() => {
     fetchBills(page);
-  }, [page]);
+  }, [page, hotelIdParam]);
 
   const prev = () => setPage((p) => Math.max(p - 1, 1));
   const next = () => setPage((p) => (bills.length < limit ? p : p + 1));
@@ -47,11 +54,11 @@ export default function BillsList() {
           <tbody>
             {bills.map((b) => (
               <tr key={b.id} className="border-b hover:bg-gray-50">
-                <td className="p-2">{b.id}</td>
-                <td className="p-2">{b.tableNumber}</td>
+                <td className="p-2 font-semibold">#{b.billNumber || b.id}</td>
+                <td className="p-2">Table {b.tableNumber}</td>
                 <td className="p-2">{b.waiterName}</td>
-                <td className="p-2">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(b.totalAmount)}</td>
-                <td className="p-2">{b.billedAt ? new Date(b.billedAt).toLocaleDateString() : "-"}</td>
+                <td className="p-2 font-bold text-amber-800">{new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(b.totalAmount)}</td>
+                <td className="p-2">{b.billedAt ? new Date(b.billedAt).toLocaleString() : "-"}</td>
               </tr>
             ))}
           </tbody>
@@ -63,6 +70,14 @@ export default function BillsList() {
         <button onClick={next} disabled={bills.length < limit} className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50">Next</button>
       </div>
     </div>
+  );
+}
+
+export default function BillsList() {
+  return (
+    <Suspense fallback={<div className="glass-panel" style={{ padding: "1.5rem" }}><p>Loading bills...</p></div>}>
+      <BillsListContent />
+    </Suspense>
   );
 }
 
